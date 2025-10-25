@@ -2,13 +2,13 @@ import { createContext, useContext, useMemo } from "react";
 
 import { TOKENS } from "./tokens";
 
-import { AuthRemoteDataSourceImpl } from "@/src/features/auth/data/datasources/AuthRemoteDataSourceImp";
+import { MockAuthDataSource } from "@/src/features/auth/data/datasources/MockAuthDataSource";
 import { AuthRepositoryImpl } from "@/src/features/auth/data/repositories/AuthRepositoryImpl";
 import { GetCurrentUserUseCase } from "@/src/features/auth/domain/usecases/GetCurrentUserUseCase";
 import { LoginUseCase } from "@/src/features/auth/domain/usecases/LoginUseCase";
 import { LogoutUseCase } from "@/src/features/auth/domain/usecases/LogoutUseCase";
 import { SignupUseCase } from "@/src/features/auth/domain/usecases/SignupUseCase";
-import { ProductRemoteDataSourceImp } from "@/src/features/products/data/datasources/ProductRemoteDataSourceImp";
+import { MockProductDataSource } from "@/src/features/products/data/datasources/MockProductDataSource";
 import { ProductRepositoryImpl } from "@/src/features/products/data/repositories/ProductRepositoryImpl";
 import { AddProductUseCase } from "@/src/features/products/domain/usecases/AddProductUseCase";
 import { DeleteProductUseCase } from "@/src/features/products/domain/usecases/DeleteProductUseCase";
@@ -24,7 +24,7 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
     const container = useMemo(() => {
         const c = new Container();
 
-        const authDS = new AuthRemoteDataSourceImpl();
+        const authDS = new MockAuthDataSource();
         const authRepo = new AuthRepositoryImpl(authDS);
 
         c.register(TOKENS.AuthRemoteDS, authDS)
@@ -35,7 +35,7 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetCurrentUserUC, new GetCurrentUserUseCase(authRepo));
 
 
-        const remoteDS = new ProductRemoteDataSourceImp(authDS);
+        const remoteDS = new MockProductDataSource();
         const productRepo = new ProductRepositoryImpl(remoteDS);
 
         c.register(TOKENS.ProductRemoteDS, remoteDS)
