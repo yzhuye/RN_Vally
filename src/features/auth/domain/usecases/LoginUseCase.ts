@@ -1,5 +1,5 @@
-import { AuthRepository } from "../../repositories/AuthRepository";
-import { AuthUser } from "../AuthUser";
+import { AuthRepository } from "../repositories/AuthRepository";
+import { AuthUser } from "../entities/AuthUser";
 
 export class LoginUseCase {
   constructor(private repo: AuthRepository) {}

@@ -35,10 +35,10 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetCurrentUserUC, new GetCurrentUserUseCase(authRepo));
 
 
-        const remoteDS = new ProductRemoteDataSourceImp(authDS);
-        const productRepo = new ProductRepositoryImpl(remoteDS);
+        const productRemoteDS = new ProductRemoteDataSourceImp(authDS);
+        const productRepo = new ProductRepositoryImpl(productRemoteDS);
 
-        c.register(TOKENS.ProductRemoteDS, remoteDS)
+        c.register(TOKENS.ProductRemoteDS, productRemoteDS)
             .register(TOKENS.ProductRepo, productRepo).register(TOKENS.AddProductUC, new AddProductUseCase(productRepo))
             .register(TOKENS.UpdateProductUC, new UpdateProductUseCase(productRepo))
             .register(TOKENS.DeleteProductUC, new DeleteProductUseCase(productRepo))
