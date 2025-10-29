@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/features/auth/presentation/context/authContext";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
-import { Button, Card, Chip, Dialog, IconButton, Portal, Searchbar, SegmentedButtons, Surface, Text, TextInput } from "react-native-paper";
+import { Alert, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Button, Card, Chip, Dialog, IconButton, Portal, Surface, Text, TextInput } from "react-native-paper";
 import { useCourse } from "../context/course.context";
 
 export default function HomeScreen() {
@@ -58,36 +58,59 @@ export default function HomeScreen() {
   return (
     <Surface style={styles.container}>
       <Surface elevation={0} style={styles.header}>
-        <Surface elevation={0} style={styles.headerTextContainer}>
+        <View style={styles.headerTextContainer}>
           <Text variant="displayMedium" style={styles.text}>
-            Hola,
+            Hola,{'\n'}{user?.username || 'Usuario'}
           </Text>
-          <Text variant="displayMedium" style={styles.text}>
-            {user?.username || 'Usuario'}
-          </Text>
-        </Surface>
+        </View>
         <IconButton
           icon="logout"
           size={24}
+          iconColor="#757575"
           onPress={logout}
         />
       </Surface>
 
-      <SegmentedButtons
-        value={selectedUserType === 'Profesor' ? 'teacher' : 'student'}
-        onValueChange={handleTypeChange}
-        buttons={[
-          { value: "student", label: "Estudiante" },
-          { value: "teacher", label: "Profesor" },
-        ]}
-        style={styles.toggleButtonRow}
-      />
+      <View style={styles.toggleButtonRow}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            selectedUserType === 'Estudiante' ? styles.toggleButtonActive : styles.toggleButtonInactive
+          ]}
+          onPress={() => selectUserType('Estudiante')}
+        >
+          <Text style={[
+            styles.toggleButtonText,
+            selectedUserType === 'Estudiante' ? styles.toggleButtonTextActive : styles.toggleButtonTextInactive
+          ]}>
+            Estudiante
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            selectedUserType === 'Profesor' ? styles.toggleButtonActive : styles.toggleButtonInactive
+          ]}
+          onPress={() => selectUserType('Profesor')}
+        >
+          <Text style={[
+            styles.toggleButtonText,
+            selectedUserType === 'Profesor' ? styles.toggleButtonTextActive : styles.toggleButtonTextInactive
+          ]}>
+            Profesor
+          </Text>
+        </TouchableOpacity>
+      </View>
       
-      <Searchbar
-        placeholder="Buscar"
-        value={searchQuery}
-        onChangeText={handleSearch}
-      />
+      <View style={styles.searchContainer}>
+        <RNTextInput
+          style={styles.searchInput}
+          placeholder="Buscar..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+      </View>
 
       <ScrollView 
         style={styles.scrollView} 
@@ -117,20 +140,21 @@ export default function HomeScreen() {
                 <Text variant="bodyMedium">
                   {course.enrolledStudents.length} estudiantes
                 </Text>
-                <Chip>{course.invitationCode}</Chip>
+                <Chip style={styles.chip} textStyle={styles.chipText}>{course.invitationCode}</Chip>
               </Card.Actions>
             </Card>
           ))
         )}
       </ScrollView>
 
-      <Button 
-        mode="contained" 
-        onPress={() => selectedUserType === 'Profesor' ? setCreateDialogVisible(true) : setJoinDialogVisible(true)} 
+      <TouchableOpacity 
         style={styles.mainButton}
+        onPress={() => selectedUserType === 'Profesor' ? setCreateDialogVisible(true) : setJoinDialogVisible(true)}
       >
-        {buttonText}
-      </Button>
+        <Text style={styles.mainButtonText}>
+          {buttonText}
+        </Text>
+      </TouchableOpacity>
 
       <Portal>
         <Dialog visible={createDialogVisible} onDismiss={() => setCreateDialogVisible(false)}>
@@ -180,48 +204,105 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
     paddingTop: 40,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    gap: 20,
   },
   header: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    marginBottom: 20,
   },
   headerTextContainer: {
     flex: 1,
   },
   text: {
+    fontSize: 32,
     fontWeight: "bold",
+    color: "#000000",
   },
   toggleButtonRow: {
     width: "100%",
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  toggleButtonActive: {
+    backgroundColor: "#00A4BD",
+  },
+  toggleButtonInactive: {
+    backgroundColor: "#E0E0E0",
+  },
+  toggleButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  toggleButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  toggleButtonTextInactive: {
+    color: "#757575",
+  },
+  searchContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  searchInput: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 16,
+    borderWidth: 0,
   },
   scrollView: {
     flex: 1,
     width: "100%",
-    gap: 10,
   },
   mainButton: {
     width: "100%",
+    backgroundColor: "#E0F7FA", // Colors.cyan[50] equivalent
+    borderRadius: 15,
+    paddingVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  mainButtonText: {
+    color: "#00A4BD",
+    fontSize: 16,
+    fontWeight: "600",
   },
   card: {
     width: "100%",
-    marginVertical: 10, 
-    gap: 10,
+    marginVertical: 10,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   cardTitle: {
     fontWeight: "bold",
+    fontSize: 18,
   },
   cardActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   emptyContainer: {
     flex: 1,
@@ -235,7 +316,16 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: "center",
-    opacity: 0.7,
+    color: "#757575",
+    fontSize: 16,
+  },
+  chip: {
+    backgroundColor: "rgba(0, 164, 189, 0.91)", // Color.fromARGB(233, 0, 164, 189) equivalent
+  },
+  chipText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 12,
   },
   input: {
     marginVertical: 8,
