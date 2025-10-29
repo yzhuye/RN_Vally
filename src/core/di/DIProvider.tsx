@@ -17,6 +17,15 @@ import { GetProductsUseCase } from "@/src/features/products/domain/usecases/GetP
 import { UpdateProductUseCase } from "@/src/features/products/domain/usecases/UpdateProductUseCase";
 import { Container } from "./container";
 
+// Course import 
+import { CourseRemoteDataSourceImp } from "@/src/features/course/data/datasources/course.remoteDataSourceImp";
+import { CourseRepositoryImpl } from "@/src/features/course/data/repositories/course.repositoryImpl";
+import { CreateCourseUseCase } from "@/src/features/course/domain/usecases/createCourse.usecases";
+import { GetAllCoursesUseCase } from "@/src/features/course/domain/usecases/getAllCourses.usecases";
+import { GetCourseByIdUseCase } from "@/src/features/course/domain/usecases/getCourse.usecases";
+import { JoinCourseUseCase } from "@/src/features/course/domain/usecases/joinCourse.usecases";
+
+
 const DIContext = createContext<Container | null>(null);
 
 export function DIProvider({ children }: { children: React.ReactNode }) {
@@ -45,7 +54,16 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetProductsUC, new GetProductsUseCase(productRepo))
             .register(TOKENS.GetProductByIdUC, new GetProductByIdUseCase(productRepo));
 
+        // Course DI registrationS
+        const courseRemoteDS = new CourseRemoteDataSourceImp(authDS);
+        const courseRepo = new CourseRepositoryImpl(courseRemoteDS);
 
+        c.register(TOKENS.CourseRemoteDS, courseRemoteDS)
+            .register(TOKENS.CourseRepo, courseRepo)
+            .register(TOKENS.CreateCourseUC, new CreateCourseUseCase(courseRepo))
+            .register(TOKENS.GetAllCoursesUC, new GetAllCoursesUseCase(courseRepo))
+            .register(TOKENS.GetCourseByIdUC, new GetCourseByIdUseCase(courseRepo))
+            .register(TOKENS.JoinCourseUC, new JoinCourseUseCase(courseRepo));
 
         return c;
     }, []);

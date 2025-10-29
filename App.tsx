@@ -7,7 +7,7 @@ import { AuthProvider } from "./src/features/auth/presentation/context/authConte
 import { ProductProvider } from "./src/features/products/presentation/context/productContext";
 import { lightTheme } from "./src/theme/theme";
 
-import HomeScreen from "./src/features/home/HomeScreen";
+import AuthFlow from "./src/AuthFlow";
 
 export default function App() {
   const scheme = useColorScheme();
@@ -37,7 +37,7 @@ export default function App() {
           <ProductProvider>
             <NavigationContainer theme={navigationTheme}>
               {/* <AuthFlow /> */}
-              <HomeScreen />
+              <AuthFlow />
             </NavigationContainer>
           </ProductProvider>
         </AuthProvider>
