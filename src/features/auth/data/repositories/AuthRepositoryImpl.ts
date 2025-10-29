@@ -10,16 +10,18 @@ export class AuthRepositoryImpl implements AuthRepository {
   }
 
   async login(email: string, password: string): Promise<AuthUser> {
-    await this.dataSource.login(email, password);
-    // After successful login, return a user object
-    // In a real app, you might want to fetch user details from the backend
-    return { email, password: "" }; // Don't store password in the user object
+    return this.dataSource.login(email, password);
   }
 
   async signup(email: string, password: string): Promise<AuthUser> {
     await this.dataSource.signUp(email, password);
-    // After successful signup, return a user object
-    return { email, password: "" }; // Don't store password in the user object
+    
+    // For signup, return a basic user object since the backend might not store username yet
+    return { 
+      email, 
+      password: "", 
+      username: email.split("@")[0]
+    };
   }
 
   async logout(): Promise<void> {
@@ -27,7 +29,6 @@ export class AuthRepositoryImpl implements AuthRepository {
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
-   // return this.dataSource.getCurrentUser();
-    return null;
+    return this.dataSource.getCurrentUser();
   }
 }

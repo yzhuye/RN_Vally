@@ -1,5 +1,6 @@
 import { ILocalPreferences } from "@/src/core/iLocalPreferences";
 import { LocalPreferencesAsyncStorage } from "@/src/core/LocalPreferencesAsyncStorage";
+import { AuthUser } from "../../domain/entities/AuthUser";
 import { AuthRemoteDataSource } from "./AuthRemoteDataSource";
 
 export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -17,7 +18,7 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     this.prefs = LocalPreferencesAsyncStorage.getInstance();
   }
 
-  async login(email: string, password: string): Promise<void> {
+  async login(email: string, password: string): Promise<AuthUser> {
     try {
       const response = await fetch(`${this.baseUrl}/login`, {
         method: "POST",
@@ -29,10 +30,22 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         const data = await response.json();
         const token = data["accessToken"];
         const refreshToken = data["refreshToken"];
+        const username = data["user"]["name"];
+        
+        // Store all user data
         await this.prefs.storeData("token", token);
         await this.prefs.storeData("refreshToken", refreshToken);
+        await this.prefs.storeData("username", username);
+        await this.prefs.storeData("email", email);
+        
         console.log("Token:", token, "\nRefresh Token:", refreshToken);
-        return Promise.resolve();
+        
+        // Return the user data
+        return {
+          email,
+          password: "",
+          username
+        };
       } else {
         const body = await response.json();
         throw new Error(`Login error: ${body.message}`);
@@ -80,6 +93,8 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.status === 201) {
         await this.prefs.removeData("token");
         await this.prefs.removeData("refreshToken");
+        await this.prefs.removeData("username");
+        await this.prefs.removeData("email");
         console.log("Logged out successfully");
         return Promise.resolve();
       } else {
@@ -170,6 +185,27 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e: any) {
       console.error("Verify token failed", e);
       return false;
+    }
+  }
+
+  async getCurrentUser(): Promise<AuthUser | null> {
+    try {
+      const token = await this.prefs.retrieveData<string>("token");
+      const email = await this.prefs.retrieveData<string>("email");
+      const username = await this.prefs.retrieveData<string>("username");
+      
+      if (!token) {
+        return null; // No token means not logged in
+      }
+      
+      return {
+        email: email || "",
+        password: "",
+        username: username || "Usuario"
+      };
+    } catch (e) {
+      console.error("Failed to get current user", e);
+      return null;
     }
   }
 }

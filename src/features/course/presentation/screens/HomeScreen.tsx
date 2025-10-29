@@ -63,7 +63,7 @@ export default function HomeScreen() {
             Hola,
           </Text>
           <Text variant="displayMedium" style={styles.text}>
-            {user?.email || 'Usuario'}
+            {user?.username || 'Usuario'}
           </Text>
         </Surface>
         <IconButton
