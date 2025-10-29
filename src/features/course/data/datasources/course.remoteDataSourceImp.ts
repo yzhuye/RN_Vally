@@ -72,7 +72,26 @@ export class CourseRemoteDataSourceImp implements CourseDataSource {
     }
 
     const data = await response.json();
-    return data.map((course: any) => this.mapToCourse(course));
+
+    // For each course, fetch enrolled students info so filtering by student email works
+    const coursesWithStudents = await Promise.all(
+      data.map(async (course: any) => {
+        try {
+          const enrolledInfo = await this.getEnrolledStudents(course._id);
+          // enrolledInfo is array of objects with at least 'email' property
+          course.enrolledStudentInfo = enrolledInfo;
+          course.enrolledStudents = enrolledInfo.map((s: any) => s.email);
+        } catch (e) {
+          // If fetching enrolled students fails for any course, leave arrays empty
+          console.warn(`Failed to load enrolled students for course ${course._id}:`, e);
+          course.enrolledStudentInfo = course.enrolledStudentInfo || [];
+          course.enrolledStudents = course.enrolledStudents || [];
+        }
+        return this.mapToCourse(course);
+      })
+    );
+
+    return coursesWithStudents;
   }
 
   async getCourseById(id: string): Promise<Course | undefined> {
@@ -185,12 +204,69 @@ export class CourseRemoteDataSourceImp implements CourseDataSource {
     const course = courses[0];
     const courseId = course._id;
 
-    // Insert into user_courses
+    // Resolve studentId: callers might pass an email instead of the user _id.
+    let resolvedUserId = studentId;
+
+    try {
+      // If it looks like an email, try to find user by email first
+      if (studentId.includes("@")) {
+        const byEmailResp = await this.authorizedFetch(
+          `${this.baseUrl}/read?tableName=users&email=${encodeURIComponent(studentId)}`,
+          { method: "GET" }
+        );
+
+        if (byEmailResp.status === 200) {
+          const usersByEmail = await byEmailResp.json();
+          if (Array.isArray(usersByEmail) && usersByEmail.length > 0) {
+            resolvedUserId = usersByEmail[0]._id;
+          } else {
+            throw new Error("User not found by email");
+          }
+        } else {
+          throw new Error(`Error finding user by email: ${byEmailResp.status}`);
+        }
+      } else {
+        // Try to verify that the provided id exists as a user _id
+        const byIdResp = await this.authorizedFetch(
+          `${this.baseUrl}/read?tableName=users&_id=${encodeURIComponent(studentId)}`,
+          { method: "GET" }
+        );
+
+        if (byIdResp.status === 200) {
+          const usersById = await byIdResp.json();
+          if (Array.isArray(usersById) && usersById.length > 0) {
+            resolvedUserId = usersById[0]._id;
+          } else {
+            // Fallback: maybe caller passed email without @ (unlikely) — try email query
+            const byEmailResp = await this.authorizedFetch(
+              `${this.baseUrl}/read?tableName=users&email=${encodeURIComponent(studentId)}`,
+              { method: "GET" }
+            );
+            if (byEmailResp.status === 200) {
+              const usersByEmail = await byEmailResp.json();
+              if (Array.isArray(usersByEmail) && usersByEmail.length > 0) {
+                resolvedUserId = usersByEmail[0]._id;
+              } else {
+                throw new Error("User not found by id or email");
+              }
+            } else {
+              throw new Error(`Error finding user: ${byEmailResp.status}`);
+            }
+          }
+        } else {
+          throw new Error(`Error finding user by id: ${byIdResp.status}`);
+        }
+      }
+    } catch (e) {
+      throw new Error(`Unable to resolve user id: ${(e as Error).message}`);
+    }
+
+    // Insert into user_courses using resolved user id
     const insertUrl = `${this.baseUrl}/insert`;
     const body = JSON.stringify({
       tableName: "user_courses",
       records: [{
-        user_id: studentId,
+        user_id: resolvedUserId,
         course_id: courseId,
         role: "student",
       }]
