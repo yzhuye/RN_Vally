@@ -20,4 +20,16 @@ export const TOKENS = {
   GetCourseByIdUC: Symbol("GetCourseByIdUC"),
   JoinCourseUC: Symbol("JoinCourseUC"),
   // Add Product tokens if you want to DI those too...
+
+  // Group tokens
+  GroupRemoteDS: Symbol("GroupRemoteDS"),
+  GroupRepo: Symbol("GroupRepo"),
+  GetGroupsByCategoryUC: Symbol("GetGroupsByCategoryUC"),
+  AddGroupUC: Symbol("AddGroupUC"),
+  JoinGroupUC: Symbol("JoinGroupUC"),
+  CreateGroupsForCategoryUC: Symbol("CreateGroupsForCategoryUC"),
+  AssignStudentToGroupUC: Symbol("AssignStudentToGroupUC"),
+  FindStudentGroupUC: Symbol("FindStudentGroupUC"),
+  MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
+
 } as const;

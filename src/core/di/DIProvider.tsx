@@ -25,6 +25,15 @@ import { GetAllCoursesUseCase } from "@/src/features/course/domain/usecases/getA
 import { GetCourseByIdUseCase } from "@/src/features/course/domain/usecases/getCourse.usecases";
 import { JoinCourseUseCase } from "@/src/features/course/domain/usecases/joinCourse.usecases";
 
+// Group imports
+import { GroupRemoteDataSourceImpl } from "@/src/features/groups/data/datasources/group.remoteDataSourceImpl";
+import { GroupRepositoryImpl } from "@/src/features/groups/data/repositories/group.repositoryImpl";
+import { AssignStudentToGroupUseCase } from "@/src/features/groups/domain/usecases/assignStudentToGroup.usecases";
+import { CreateGroupsForCategoryUseCase } from "@/src/features/groups/domain/usecases/createGroupForCategory.usecases";
+import { FindStudentGroupUseCase } from "@/src/features/groups/domain/usecases/FindStudentGroup.usecases";
+import { GetGroupsByCategoryUseCase } from "@/src/features/groups/domain/usecases/getGroupsByCategory.usecases";
+import { JoinGroupUseCase } from "@/src/features/groups/domain/usecases/joinGroup.usecases";
+import { MoveStudentToGroupUseCase } from "@/src/features/groups/domain/usecases/moveStutendToGroup.usecases";
 
 const DIContext = createContext<Container | null>(null);
 
@@ -65,6 +74,19 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetCourseByIdUC, new GetCourseByIdUseCase(courseRepo))
             .register(TOKENS.JoinCourseUC, new JoinCourseUseCase(courseRepo));
 
+        // Group DI registrations
+        const groupRemoteDS = new GroupRemoteDataSourceImpl(authDS);
+        const groupRepo = new GroupRepositoryImpl(groupRemoteDS);
+
+        c.register(TOKENS.GroupRemoteDS, groupRemoteDS)
+            .register(TOKENS.GroupRepo, groupRepo)
+            .register(TOKENS.GetGroupsByCategoryUC, new GetGroupsByCategoryUseCase(groupRepo))
+            .register(TOKENS.JoinGroupUC, new JoinGroupUseCase(groupRepo))
+            .register(TOKENS.CreateGroupsForCategoryUC, new CreateGroupsForCategoryUseCase(groupRepo))
+            .register(TOKENS.AssignStudentToGroupUC, new AssignStudentToGroupUseCase(groupRepo))
+            .register(TOKENS.FindStudentGroupUC, new FindStudentGroupUseCase(groupRepo))
+            .register(TOKENS.MoveStudentToGroupUC, new MoveStudentToGroupUseCase(groupRepo));
+        
         return c;
     }, []);
 
