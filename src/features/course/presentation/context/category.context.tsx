@@ -92,7 +92,7 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const updateCategory = async (courseId: string, category: Category) => {
     setIsLoading(true);
     try {
-      const result = await updateCategoryUseCase.execute(courseId, category);
+      const result = await updateCategoryUseCase.execute(category);
 
       if (result.isSuccess) {
         await loadCategories(courseId);
@@ -111,7 +111,7 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const deleteCategory = async (courseId: string, categoryId: string) => {
     setIsLoading(true);
     try {
-      const result = await deleteCategoryUseCase.execute(courseId, categoryId);
+      const result = await deleteCategoryUseCase.execute(categoryId);
 
       if (result.isSuccess) {
         await loadCategories(courseId);

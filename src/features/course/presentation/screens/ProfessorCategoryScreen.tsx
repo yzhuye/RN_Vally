@@ -72,7 +72,8 @@ export default function ProfessorCategoryScreen() {
         {
           text: 'Ver Grupos',
           onPress: () => {
-            navigation.navigate('ProfessorGroups' as never, { course, category } as never);
+            // TODO!!!
+            //navigation.navigate('ProfessorGroups' as never, { course, category } as never);
           },
         },
         {

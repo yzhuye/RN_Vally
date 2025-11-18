@@ -91,20 +91,24 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
   }
 
   async updateCategory(
-    courseId: string,
     category: Category
   ): Promise<{ isSuccess: boolean; message: string }> {
     try {
-      const response = await fetch(`${API_URL}/courses/${courseId}/categories/${category.id}`, {
+      const response = await fetch(`${API_URL}/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: category.name,
-          groupingMethod: category.groupingMethod,
-          groupCount: category.groupCount,
-          studentsPerGroup: category.studentsPerGroup,
+          tableName: 'categories',
+          idColumn: '_id',
+          idValue: category.id,
+          updates: {
+            name: category.name,
+            groupingMethod: category.groupingMethod,
+            groupCount: category.groupCount,
+            studentsPerGroup: category.studentsPerGroup,
+          },
         }),
       });
 
@@ -131,12 +135,19 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
   }
 
   async deleteCategory(
-    courseId: string,
     categoryId: string
   ): Promise<{ isSuccess: boolean; message: string }> {
     try {
-      const response = await fetch(`${API_URL}/courses/${courseId}/categories/${categoryId}`, {
+      const response = await fetch(`${API_URL}/delete`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tableName: 'categories',
+          idColumn: '_id',
+          idValue: categoryId,
+        }),
       });
 
       const data = await response.json();

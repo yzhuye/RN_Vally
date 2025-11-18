@@ -20,17 +20,15 @@ export class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   async updateCategory(
-    courseId: string,
     category: Category
   ): Promise<{ isSuccess: boolean; message: string }> {
-    return this.dataSource.updateCategory(courseId, category);
+    return this.dataSource.updateCategory(category);
   }
 
   async deleteCategory(
-    courseId: string,
     categoryId: string
   ): Promise<{ isSuccess: boolean; message: string }> {
-    return this.dataSource.deleteCategory(courseId, categoryId);
+    return this.dataSource.deleteCategory(categoryId);
   }
 }
 
