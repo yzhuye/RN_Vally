@@ -40,7 +40,8 @@ import { AddCategoryUseCase } from "@/src/features/category/domain/usecases/addC
 import { DeleteCategoryUseCase } from "@/src/features/category/domain/usecases/deleteCategory.usecase";
 import { GetCategoriesUseCase } from "@/src/features/category/domain/usecases/getCategories.usecase";
 import { UpdateCategoryUseCase } from "@/src/features/category/domain/usecases/updateCategory.usecase";
-import { CategoryRepositoryImpl } from "@/src/features/course/data/repositories/category.repositoryImpl";
+import { GroupRepositoryImpl } from "@/src/features/groups/data/repositories/group.repositoryImpl";
+import { CategoryRepositoryImpl } from "@/src/features/category/data/repositories/category.repositoryImpl";
 
 const DIContext = createContext<Container | null>(null);
 
@@ -81,8 +82,6 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetCourseByIdUC, new GetCourseByIdUseCase(courseRepo))
             .register(TOKENS.JoinCourseUC, new JoinCourseUseCase(courseRepo));
 
-        // Group DI registrations
-        const groupRemoteDS = new GroupRemoteDataSourceImpl(authDS);
         // Category DI registrations
         const categoryRemoteDS = new CategoryRemoteDataSourceImpl();
         const categoryRepo = new CategoryRepositoryImpl(categoryRemoteDS);
@@ -94,6 +93,10 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.UpdateCategoryUC, new UpdateCategoryUseCase(categoryRepo))
             .register(TOKENS.DeleteCategoryUC, new DeleteCategoryUseCase(categoryRepo));
 
+        // Group DI registrations
+        const groupRemoteDS = new GroupRemoteDataSourceImpl(authDS);
+        const groupRepo = new GroupRepositoryImpl(groupRemoteDS);
+        
         c.register(TOKENS.GroupRemoteDS, groupRemoteDS)
             .register(TOKENS.GroupRepo, groupRepo)
             .register(TOKENS.GetGroupsByCategoryUC, new GetGroupsByCategoryUseCase(groupRepo))

@@ -27,11 +27,14 @@ export const TOKENS = {
   UpdateCategoryUC: Symbol("UpdateCategoryUC"),
   DeleteCategoryUC: Symbol("DeleteCategoryUC"),
 
+  GroupRemoteDS: Symbol("GroupRemoteDS"),
+  GroupRepo: Symbol("GroupRepo"),
   AddGroupUC: Symbol("AddGroupUC"),
   JoinGroupUC: Symbol("JoinGroupUC"),
   CreateGroupsForCategoryUC: Symbol("CreateGroupsForCategoryUC"),
   AssignStudentToGroupUC: Symbol("AssignStudentToGroupUC"),
   FindStudentGroupUC: Symbol("FindStudentGroupUC"),
   MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
+  GetGroupsByCategoryUC: Symbol("GetGroupsByCategoryUC"),
 
 } as const;

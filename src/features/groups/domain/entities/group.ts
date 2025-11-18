@@ -7,4 +7,8 @@ export class Group {
     public members: string[],
     public categoryId: string,
   ) {}
+
+  get isFull(): boolean {
+    return this.currentCapacity >= this.maxCapacity;
+  }
 }
