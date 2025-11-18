@@ -1,5 +1,5 @@
-import { CategoryRepository } from '../../../course/domain/repositories/category.repository';
 import { Category } from '../../domain/entities/category';
+import { CategoryRepository } from '../../domain/repositories/category.repository';
 import { CategoryDataSource } from '../datasources/category.datasource';
 
 export class CategoryRepositoryImpl implements CategoryRepository {
@@ -20,17 +20,14 @@ export class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   async updateCategory(
-    courseId: string,
     category: Category
   ): Promise<{ isSuccess: boolean; message: string }> {
-    return this.dataSource.updateCategory(courseId, category);
+    return this.dataSource.updateCategory(category);
   }
 
   async deleteCategory(
-    courseId: string,
     categoryId: string
   ): Promise<{ isSuccess: boolean; message: string }> {
-    return this.dataSource.deleteCategory(courseId, categoryId);
+    return this.dataSource.deleteCategory(categoryId);
   }
 }
-

@@ -5,10 +5,8 @@ export class UpdateCategoryUseCase {
   constructor(private repository: CategoryRepository) {}
 
   async execute(
-    courseId: string,
     category: Category
   ): Promise<{ isSuccess: boolean; message: string }> {
-    return this.repository.updateCategory(courseId, category);
+    return this.repository.updateCategory(category);
   }
 }
-
