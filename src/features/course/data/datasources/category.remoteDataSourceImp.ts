@@ -1,19 +1,37 @@
+import { ILocalPreferences } from '../../../../core/iLocalPreferences';
 import { Category } from '../../domain/entities/category';
 import { CategoryDataSource } from './category.datasource';
+import { LocalPreferencesAsyncStorage } from '../../../../core/LocalPreferencesAsyncStorage';
 
-const API_URL = 'http://192.168.1.6:3000/api';
+const projectId = process.env.EXPO_PUBLIC_ROBLE_PROJECT_ID;
+const API_URL = `https://roble-api.openlab.uninorte.edu.co/database/${projectId}`;
 
 export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
+
+  private prefs: ILocalPreferences;
+
+  constructor() {
+    this.prefs = LocalPreferencesAsyncStorage.getInstance();
+  }
+
   async getCategories(courseId: string): Promise<Category[]> {
     try {
-      const response = await fetch(`${API_URL}/courses/${courseId}/categories`);
+      const token = await this.prefs.retrieveData<string>("token");
+      const response = await fetch(`${API_URL}/read?tableName=categories&course_id=${courseId}`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
 
       const data = await response.json();
-      return (data.categories || []).map((c: any) => Category.fromJson(c));
+      const result = (data || []).map((c: any) => Category.fromJson(c));
+      return result;
     } catch (error) {
       console.error('Error fetching categories:', error);
       throw error;
@@ -28,16 +46,24 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
     studentsPerGroup: number
   ): Promise<{ isSuccess: boolean; message: string; category?: Category }> {
     try {
-      const response = await fetch(`${API_URL}/courses/${courseId}/categories`, {
+      const token = await this.prefs.retrieveData<string>("token");
+      const response = await fetch(`${API_URL}/insert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name,
-          groupingMethod,
-          groupCount,
-          studentsPerGroup,
+          tableName : 'categories',
+          records: [
+            {
+              name,
+              groupingMethod,
+              groupCount,
+              studentsPerGroup,
+              course_id: courseId
+            }
+          ]
         }),
       });
 
@@ -49,11 +75,11 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
           message: data.message || 'Error al crear la categoría',
         };
       }
-
+      console.log(data);
       return {
         isSuccess: true,
         message: 'Categoría creada exitosamente',
-        category: data.category ? Category.fromJson(data.category) : undefined,
+        category: data.inserted[0] ? Category.fromJson(data.inserted[0]) : undefined,
       };
     } catch (error) {
       console.error('Error adding category:', error);

@@ -4,7 +4,6 @@ import { PaperProvider } from "react-native-paper";
 
 import { DIProvider } from "./src/core/di/DIProvider";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
-import { ProductProvider } from "./src/features/products/presentation/context/productContext";
 import { CourseProvider } from "./src/features/course/presentation/context/course.context";
 import { CategoryProvider } from "./src/features/course/presentation/context/category.context";
 import { ProfessorProvider } from "./src/features/course/presentation/context/professor.context";
@@ -37,7 +36,6 @@ export default function App() {
     <PaperProvider theme={theme}>
       <DIProvider>
         <AuthProvider>
-          <ProductProvider>
             <CourseProvider>
               <CategoryProvider>
                 <ProfessorProvider>
@@ -48,7 +46,6 @@ export default function App() {
                 </ProfessorProvider>
               </CategoryProvider>
             </CourseProvider>
-          </ProductProvider>
         </AuthProvider>
       </DIProvider>
     </PaperProvider>

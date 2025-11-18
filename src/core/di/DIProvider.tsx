@@ -8,13 +8,6 @@ import { GetCurrentUserUseCase } from "@/src/features/auth/domain/usecases/GetCu
 import { LoginUseCase } from "@/src/features/auth/domain/usecases/LoginUseCase";
 import { LogoutUseCase } from "@/src/features/auth/domain/usecases/LogoutUseCase";
 import { SignupUseCase } from "@/src/features/auth/domain/usecases/SignupUseCase";
-import { ProductRemoteDataSourceImp } from "@/src/features/products/data/datasources/ProductRemoteDataSourceImp";
-import { ProductRepositoryImpl } from "@/src/features/products/data/repositories/ProductRepositoryImpl";
-import { AddProductUseCase } from "@/src/features/products/domain/usecases/AddProductUseCase";
-import { DeleteProductUseCase } from "@/src/features/products/domain/usecases/DeleteProductUseCase";
-import { GetProductByIdUseCase } from "@/src/features/products/domain/usecases/GetProductByIdUseCase";
-import { GetProductsUseCase } from "@/src/features/products/domain/usecases/GetProductsUseCase";
-import { UpdateProductUseCase } from "@/src/features/products/domain/usecases/UpdateProductUseCase";
 import { Container } from "./container";
 
 // Course import 
@@ -59,17 +52,6 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.SignupUC, new SignupUseCase(authRepo))
             .register(TOKENS.LogoutUC, new LogoutUseCase(authRepo))
             .register(TOKENS.GetCurrentUserUC, new GetCurrentUserUseCase(authRepo));
-
-
-        const productRemoteDS = new ProductRemoteDataSourceImp(authDS);
-        const productRepo = new ProductRepositoryImpl(productRemoteDS);
-
-        c.register(TOKENS.ProductRemoteDS, productRemoteDS)
-            .register(TOKENS.ProductRepo, productRepo).register(TOKENS.AddProductUC, new AddProductUseCase(productRepo))
-            .register(TOKENS.UpdateProductUC, new UpdateProductUseCase(productRepo))
-            .register(TOKENS.DeleteProductUC, new DeleteProductUseCase(productRepo))
-            .register(TOKENS.GetProductsUC, new GetProductsUseCase(productRepo))
-            .register(TOKENS.GetProductByIdUC, new GetProductByIdUseCase(productRepo));
 
         // Course DI registrationS
         const courseRemoteDS = new CourseRemoteDataSourceImp(authDS);
