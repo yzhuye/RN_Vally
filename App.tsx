@@ -4,10 +4,10 @@ import { PaperProvider } from "react-native-paper";
 
 import { DIProvider } from "./src/core/di/DIProvider";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
-import { ProductProvider } from "./src/features/products/presentation/context/productContext";
+import { CategoryProvider } from "./src/features/category/presentation/context/category.context";
 import { CourseProvider } from "./src/features/course/presentation/context/course.context";
-import { CategoryProvider } from "./src/features/course/presentation/context/category.context";
-import { ProfessorProvider } from "./src/features/course/presentation/context/professor.context";
+import { ProfessorProvider } from "./src/features/groups/presentation/context/professor.context";
+import { ProductProvider } from "./src/features/products/presentation/context/productContext";
 import { lightTheme } from "./src/theme/theme";
 
 import AuthFlow from "./src/AuthFlow";

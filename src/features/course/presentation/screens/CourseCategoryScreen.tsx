@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Card, IconButton, ActivityIndicator } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Card, IconButton, Text } from 'react-native-paper';
+import { useCategory } from '../../../category/presentation/context/category.context';
 import { Course } from '../../domain/entities/course';
 import { CourseDetailHeader } from '../components/CourseDetailHeader';
-import { useCategory } from '../context/category.context';
 
 const primaryColor = '#00BCD4';
 const backgroundColor = '#F5F7FA';

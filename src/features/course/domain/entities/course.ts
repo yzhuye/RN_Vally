@@ -1,4 +1,4 @@
-import { Category } from './category';
+import { Category } from '../../../category/domain/entities/category';
 import { Group } from './group';
 
 export class Course {

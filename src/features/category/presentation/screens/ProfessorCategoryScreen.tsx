@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Text, FAB, Card, IconButton, ActivityIndicator } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { Course } from '../../domain/entities/course';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Card, FAB, IconButton, Text } from 'react-native-paper';
+import { Course } from '../../../course/domain/entities/course';
+import { CourseDetailHeader } from '../../../course/presentation/components/CourseDetailHeader';
 import { Category } from '../../domain/entities/category';
-import { CourseDetailHeader } from '../components/CourseDetailHeader';
 import { AddCategoryDialog, EditCategoryDialog } from '../components/CategoryDialogs';
 import { useCategory } from '../context/category.context';
 

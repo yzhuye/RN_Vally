@@ -27,21 +27,20 @@ import { JoinCourseUseCase } from "@/src/features/course/domain/usecases/joinCou
 
 // Group imports
 import { GroupRemoteDataSourceImpl } from "@/src/features/groups/data/datasources/group.remoteDataSourceImpl";
-import { GroupRepositoryImpl } from "@/src/features/groups/data/repositories/group.repositoryImpl";
 import { AssignStudentToGroupUseCase } from "@/src/features/groups/domain/usecases/assignStudentToGroup.usecases";
 import { CreateGroupsForCategoryUseCase } from "@/src/features/groups/domain/usecases/createGroupForCategory.usecases";
-import { FindStudentGroupUseCase } from "@/src/features/groups/domain/usecases/FindStudentGroup.usecases";
+import { FindStudentGroupUseCase } from "@/src/features/groups/domain/usecases/findStudentGroup.usecases";
 import { GetGroupsByCategoryUseCase } from "@/src/features/groups/domain/usecases/getGroupsByCategory.usecases";
 import { JoinGroupUseCase } from "@/src/features/groups/domain/usecases/joinGroup.usecases";
 import { MoveStudentToGroupUseCase } from "@/src/features/groups/domain/usecases/moveStutendToGroup.usecases";
 
 // Category imports
-import { CategoryRemoteDataSourceImpl } from "@/src/features/course/data/datasources/category.remoteDataSourceImp";
+import { CategoryRemoteDataSourceImpl } from "@/src/features/category/data/datasources/category.remoteDataSourceImp";
+import { AddCategoryUseCase } from "@/src/features/category/domain/usecases/addCategory.usecase";
+import { DeleteCategoryUseCase } from "@/src/features/category/domain/usecases/deleteCategory.usecase";
+import { GetCategoriesUseCase } from "@/src/features/category/domain/usecases/getCategories.usecase";
+import { UpdateCategoryUseCase } from "@/src/features/category/domain/usecases/updateCategory.usecase";
 import { CategoryRepositoryImpl } from "@/src/features/course/data/repositories/category.repositoryImpl";
-import { GetCategoriesUseCase } from "@/src/features/course/domain/usecases/getCategories.usecase";
-import { AddCategoryUseCase } from "@/src/features/course/domain/usecases/addCategory.usecase";
-import { UpdateCategoryUseCase } from "@/src/features/course/domain/usecases/updateCategory.usecase";
-import { DeleteCategoryUseCase } from "@/src/features/course/domain/usecases/deleteCategory.usecase";
 
 const DIContext = createContext<Container | null>(null);
 
