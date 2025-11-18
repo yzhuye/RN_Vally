@@ -86,26 +86,37 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const assignStudentToGroup = async (studentId: string, groupId: string): Promise<boolean> => {
-    setIsAssigningStudent(true);
-    try {
-      const result = await assignStudentUseCase.execute(studentId, groupId);
+const assignStudentToGroup = async (
+  studentId: string,
+  groupId: string,
+  showAlert: boolean = true
+): Promise<boolean> => {
+  setIsAssigningStudent(true);
+  try {
+    const result = await assignStudentUseCase.execute(studentId, groupId);
 
-      if (result.isSuccess) {
+    if (result.isSuccess) {
+      if (showAlert) {
         Alert.alert('Éxito', result.message);
-        return true;
-      } else {
-        Alert.alert('Error', result.message);
-        return false;
       }
-    } catch (error) {
-      console.error('Error assigning student:', error);
-      Alert.alert('Error', 'Error al asignar estudiante');
+      return true;
+    } else {
+      if (showAlert) {
+        Alert.alert('Error', result.message);
+      }
       return false;
-    } finally {
-      setIsAssigningStudent(false);
     }
-  };
+  } catch (error) {
+    console.error('Error assigning student:', error);
+    if (showAlert) {
+      Alert.alert('Error', 'Error al asignar estudiante');
+    }
+    return false;
+  } finally {
+    setIsAssigningStudent(false);
+  }
+};
+
 
   const moveStudentToGroup = async (studentEmail: string, toGroupId: string): Promise<boolean> => {
     setIsAssigningStudent(true);
@@ -167,7 +178,7 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
 
         if (!group.isFull) {
           const studentIdentifier = shuffledStudents[studentIndex];
-          const success = await assignStudentToGroup(studentIdentifier, group.id);
+          const success = await assignStudentToGroup(studentIdentifier, group.id, false);
           
           if (success) {
             // Actualizar el grupo localmente
@@ -214,7 +225,7 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
 
           if (!group.isFull) {
             const studentIdentifier = shuffledStudents[studentIndex];
-            await assignStudentToGroup(studentIdentifier, group.id);
+            await assignStudentToGroup(studentIdentifier, group.id, false);
             studentIndex++;
           }
 
