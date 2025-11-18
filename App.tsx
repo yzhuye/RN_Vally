@@ -5,6 +5,9 @@ import { PaperProvider } from "react-native-paper";
 import { DIProvider } from "./src/core/di/DIProvider";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
 import { ProductProvider } from "./src/features/products/presentation/context/productContext";
+import { CourseProvider } from "./src/features/course/presentation/context/course.context";
+import { CategoryProvider } from "./src/features/course/presentation/context/category.context";
+import { ProfessorProvider } from "./src/features/course/presentation/context/professor.context";
 import { lightTheme } from "./src/theme/theme";
 
 import AuthFlow from "./src/AuthFlow";
@@ -35,10 +38,16 @@ export default function App() {
       <DIProvider>
         <AuthProvider>
           <ProductProvider>
-            <NavigationContainer theme={navigationTheme}>
-              {/* <AuthFlow /> */}
-              <AuthFlow />
-            </NavigationContainer>
+            <CourseProvider>
+              <CategoryProvider>
+                <ProfessorProvider>
+                  <NavigationContainer theme={navigationTheme}>
+                    {/* <AuthFlow /> */}
+                    <AuthFlow />
+                  </NavigationContainer>
+                </ProfessorProvider>
+              </CategoryProvider>
+            </CourseProvider>
           </ProductProvider>
         </AuthProvider>
       </DIProvider>

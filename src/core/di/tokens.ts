@@ -19,12 +19,14 @@ export const TOKENS = {
   GetAllCoursesUC: Symbol("GetAllCoursesUC"),
   GetCourseByIdUC: Symbol("GetCourseByIdUC"),
   JoinCourseUC: Symbol("JoinCourseUC"),
-  // Add Product tokens if you want to DI those too...
 
-  // Group tokens
-  GroupRemoteDS: Symbol("GroupRemoteDS"),
-  GroupRepo: Symbol("GroupRepo"),
-  GetGroupsByCategoryUC: Symbol("GetGroupsByCategoryUC"),
+  CategoryRemoteDS: Symbol("CategoryRemoteDS"),
+  CategoryRepo: Symbol("CategoryRepo"),
+  GetCategoriesUC: Symbol("GetCategoriesUC"),
+  AddCategoryUC: Symbol("AddCategoryUC"),
+  UpdateCategoryUC: Symbol("UpdateCategoryUC"),
+  DeleteCategoryUC: Symbol("DeleteCategoryUC"),
+
   AddGroupUC: Symbol("AddGroupUC"),
   JoinGroupUC: Symbol("JoinGroupUC"),
   CreateGroupsForCategoryUC: Symbol("CreateGroupsForCategoryUC"),

@@ -1,4 +1,5 @@
 import { useAuth } from "@/src/features/auth/presentation/context/authContext";
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { Alert, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Card, Chip, Dialog, IconButton, Portal, Surface, Text, TextInput } from "react-native-paper";
@@ -6,6 +7,7 @@ import { useCourse } from "../context/course.context";
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
   const { 
     filteredCourses,
     isLoading,
@@ -54,6 +56,16 @@ export default function HomeScreen() {
   };
 
   const buttonText = selectedUserType === 'Profesor' ? "Crear Curso" : "Unirse a Curso";
+
+  const handleCoursePress = (course: any) => {
+    if (selectedUserType === 'Profesor') {
+      // Navegar a gestión de curso para profesores
+      (navigation as any).navigate('CourseManagement', { course });
+    } else {
+      // Navegar a categorías del curso para estudiantes
+      (navigation as any).navigate('CourseCategory', { course });
+    }
+  };
 
   return (
     <Surface style={styles.container}>
@@ -130,7 +142,7 @@ export default function HomeScreen() {
           </Surface>
         ) : (
           filteredCourses.map((course) => (
-            <Card key={course._id} style={styles.card}>
+            <Card key={course._id} style={styles.card} onPress={() => handleCoursePress(course)}>
               {course.imageUrl && <Card.Cover source={{ uri: course.imageUrl }} />}
               <Card.Title title={course.title} titleStyle={styles.cardTitle}/>
               <Card.Content>

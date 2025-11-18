@@ -35,6 +35,14 @@ import { GetGroupsByCategoryUseCase } from "@/src/features/groups/domain/usecase
 import { JoinGroupUseCase } from "@/src/features/groups/domain/usecases/joinGroup.usecases";
 import { MoveStudentToGroupUseCase } from "@/src/features/groups/domain/usecases/moveStutendToGroup.usecases";
 
+// Category imports
+import { CategoryRemoteDataSourceImpl } from "@/src/features/course/data/datasources/category.remoteDataSourceImp";
+import { CategoryRepositoryImpl } from "@/src/features/course/data/repositories/category.repositoryImpl";
+import { GetCategoriesUseCase } from "@/src/features/course/domain/usecases/getCategories.usecase";
+import { AddCategoryUseCase } from "@/src/features/course/domain/usecases/addCategory.usecase";
+import { UpdateCategoryUseCase } from "@/src/features/course/domain/usecases/updateCategory.usecase";
+import { DeleteCategoryUseCase } from "@/src/features/course/domain/usecases/deleteCategory.usecase";
+
 const DIContext = createContext<Container | null>(null);
 
 export function DIProvider({ children }: { children: React.ReactNode }) {
@@ -76,7 +84,16 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
 
         // Group DI registrations
         const groupRemoteDS = new GroupRemoteDataSourceImpl(authDS);
-        const groupRepo = new GroupRepositoryImpl(groupRemoteDS);
+        // Category DI registrations
+        const categoryRemoteDS = new CategoryRemoteDataSourceImpl();
+        const categoryRepo = new CategoryRepositoryImpl(categoryRemoteDS);
+
+        c.register(TOKENS.CategoryRemoteDS, categoryRemoteDS)
+            .register(TOKENS.CategoryRepo, categoryRepo)
+            .register(TOKENS.GetCategoriesUC, new GetCategoriesUseCase(categoryRepo))
+            .register(TOKENS.AddCategoryUC, new AddCategoryUseCase(categoryRepo))
+            .register(TOKENS.UpdateCategoryUC, new UpdateCategoryUseCase(categoryRepo))
+            .register(TOKENS.DeleteCategoryUC, new DeleteCategoryUseCase(categoryRepo));
 
         c.register(TOKENS.GroupRemoteDS, groupRemoteDS)
             .register(TOKENS.GroupRepo, groupRepo)
@@ -86,7 +103,7 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.AssignStudentToGroupUC, new AssignStudentToGroupUseCase(groupRepo))
             .register(TOKENS.FindStudentGroupUC, new FindStudentGroupUseCase(groupRepo))
             .register(TOKENS.MoveStudentToGroupUC, new MoveStudentToGroupUseCase(groupRepo));
-        
+
         return c;
     }, []);
 
