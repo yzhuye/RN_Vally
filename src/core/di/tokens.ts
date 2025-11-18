@@ -19,19 +19,19 @@ export const TOKENS = {
   GetAllCoursesUC: Symbol("GetAllCoursesUC"),
   GetCourseByIdUC: Symbol("GetCourseByIdUC"),
   JoinCourseUC: Symbol("JoinCourseUC"),
-  // Category tokens
+
   CategoryRemoteDS: Symbol("CategoryRemoteDS"),
   CategoryRepo: Symbol("CategoryRepo"),
   GetCategoriesUC: Symbol("GetCategoriesUC"),
   AddCategoryUC: Symbol("AddCategoryUC"),
   UpdateCategoryUC: Symbol("UpdateCategoryUC"),
   DeleteCategoryUC: Symbol("DeleteCategoryUC"),
-  // Group tokens
-  GroupRemoteDS: Symbol("GroupRemoteDS"),
-  GroupRepo: Symbol("GroupRepo"),
-  GetGroupsByCategoryUC: Symbol("GetGroupsByCategoryUC"),
+
+  AddGroupUC: Symbol("AddGroupUC"),
+  JoinGroupUC: Symbol("JoinGroupUC"),
   CreateGroupsForCategoryUC: Symbol("CreateGroupsForCategoryUC"),
   AssignStudentToGroupUC: Symbol("AssignStudentToGroupUC"),
-  MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
   FindStudentGroupUC: Symbol("FindStudentGroupUC"),
+  MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
+
 } as const;
