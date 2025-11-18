@@ -19,21 +19,22 @@ import { GetCourseByIdUseCase } from "@/src/features/course/domain/usecases/getC
 import { JoinCourseUseCase } from "@/src/features/course/domain/usecases/joinCourse.usecases";
 
 // Category imports
-import { CategoryRemoteDataSourceImpl } from "@/src/features/course/data/datasources/category.remoteDataSourceImp";
-import { CategoryRepositoryImpl } from "@/src/features/course/data/repositories/category.repositoryImpl";
-import { GetCategoriesUseCase } from "@/src/features/course/domain/usecases/getCategories.usecase";
-import { AddCategoryUseCase } from "@/src/features/course/domain/usecases/addCategory.usecase";
-import { UpdateCategoryUseCase } from "@/src/features/course/domain/usecases/updateCategory.usecase";
-import { DeleteCategoryUseCase } from "@/src/features/course/domain/usecases/deleteCategory.usecase";
+import { CategoryRemoteDataSourceImpl } from "@/src/features/category/data/datasources/category.remoteDataSourceImp";
+import { CategoryRepositoryImpl } from "@/src/features/category/data/repositories/category.repositoryImpl";
+import { AddCategoryUseCase } from "@/src/features/category/domain/usecases/addCategory.usecase";
+import { DeleteCategoryUseCase } from "@/src/features/category/domain/usecases/deleteCategory.usecase";
+import { GetCategoriesUseCase } from "@/src/features/category/domain/usecases/getCategories.usecase";
+import { UpdateCategoryUseCase } from "@/src/features/category/domain/usecases/updateCategory.usecase";
 
 // Group imports
-import { GroupRemoteDataSourceImpl } from "@/src/features/course/data/datasources/group.remoteDataSourceImp";
-import { GroupRepositoryImpl } from "@/src/features/course/data/repositories/group.repositoryImpl";
-import { GetGroupsByCategoryUseCase } from "@/src/features/course/domain/usecases/getGroupsByCategory.usecase";
-import { CreateGroupsForCategoryUseCase } from "@/src/features/course/domain/usecases/createGroupsForCategory.usecase";
-import { AssignStudentToGroupUseCase } from "@/src/features/course/domain/usecases/assignStudentToGroup.usecase";
-import { MoveStudentToGroupUseCase } from "@/src/features/course/domain/usecases/moveStudentToGroup.usecase";
-import { FindStudentGroupUseCase } from "@/src/features/course/domain/usecases/findStudentGroup.usecase";
+import { GroupRemoteDataSourceImpl } from "@/src/features/group/data/datasources/group.remoteDataSourceImp";
+import { GroupRepositoryImpl } from "@/src/features/group/data/repositories/group.repositoryImpl";
+import { AssignStudentToGroupUseCase } from "@/src/features/group/domain/usecases/assignStudentToGroup.usecase";
+import { CreateGroupsForCategoryUseCase } from "@/src/features/group/domain/usecases/createGroupsForCategory.usecase";
+import { FindStudentGroupUseCase } from "@/src/features/group/domain/usecases/findStudentGroup.usecase";
+import { GetGroupsByCategoryUseCase } from "@/src/features/group/domain/usecases/getGroupsByCategory.usecase";
+import { JoinGroupUseCase } from "@/src/features/group/domain/usecases/joinGroup.usecase";
+import { MoveStudentToGroupUseCase } from "@/src/features/group/domain/usecases/moveStudentToGroup.usecase";
 
 
 const DIContext = createContext<Container | null>(null);
@@ -76,7 +77,7 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.DeleteCategoryUC, new DeleteCategoryUseCase(categoryRepo));
 
         // Group DI registrations
-        const groupRemoteDS = new GroupRemoteDataSourceImpl();
+        const groupRemoteDS = new GroupRemoteDataSourceImpl(authDS);
         const groupRepo = new GroupRepositoryImpl(groupRemoteDS);
 
         c.register(TOKENS.GroupRemoteDS, groupRemoteDS)
@@ -85,7 +86,8 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.CreateGroupsForCategoryUC, new CreateGroupsForCategoryUseCase(groupRepo))
             .register(TOKENS.AssignStudentToGroupUC, new AssignStudentToGroupUseCase(groupRepo))
             .register(TOKENS.MoveStudentToGroupUC, new MoveStudentToGroupUseCase(groupRepo))
-            .register(TOKENS.FindStudentGroupUC, new FindStudentGroupUseCase(groupRepo));
+            .register(TOKENS.FindStudentGroupUC, new FindStudentGroupUseCase(groupRepo))
+            .register(TOKENS.JoinGroupUC, new JoinGroupUseCase(groupRepo));
 
         return c;
     }, []);

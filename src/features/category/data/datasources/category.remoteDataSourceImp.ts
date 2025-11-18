@@ -1,7 +1,7 @@
 import { ILocalPreferences } from '../../../../core/iLocalPreferences';
+import { LocalPreferencesAsyncStorage } from '../../../../core/LocalPreferencesAsyncStorage';
 import { Category } from '../../domain/entities/category';
 import { CategoryDataSource } from './category.datasource';
-import { LocalPreferencesAsyncStorage } from '../../../../core/LocalPreferencesAsyncStorage';
 
 const projectId = process.env.EXPO_PUBLIC_ROBLE_PROJECT_ID;
 const API_URL = `https://roble-api.openlab.uninorte.edu.co/database/${projectId}`;
@@ -75,7 +75,6 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
           message: data.message || 'Error al crear la categoría',
         };
       }
-      console.log(data);
       return {
         isSuccess: true,
         message: 'Categoría creada exitosamente',

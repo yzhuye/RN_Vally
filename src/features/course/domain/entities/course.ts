@@ -1,5 +1,5 @@
-import { Category } from './category';
-import { Group } from './group';
+import { Category } from '../../../category/domain/entities/category';
+import { Group } from '../../../group/domain/entities/group';
 
 export class Course {
   constructor(

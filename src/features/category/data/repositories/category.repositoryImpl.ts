@@ -1,5 +1,5 @@
+import { CategoryRepository } from '../../../course/domain/repositories/category.repository';
 import { Category } from '../../domain/entities/category';
-import { CategoryRepository } from '../../domain/repositories/category.repository';
 import { CategoryDataSource } from '../datasources/category.datasource';
 
 export class CategoryRepositoryImpl implements CategoryRepository {

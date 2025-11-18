@@ -34,4 +34,5 @@ export const TOKENS = {
   AssignStudentToGroupUC: Symbol("AssignStudentToGroupUC"),
   MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
   FindStudentGroupUC: Symbol("FindStudentGroupUC"),
+  JoinGroupUC: Symbol("JoinGroupUC"),
 } as const;

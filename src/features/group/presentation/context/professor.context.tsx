@@ -1,13 +1,13 @@
 import { useDI } from '@/src/core/di/DIProvider';
 import { TOKENS } from '@/src/core/di/tokens';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Course, StudentInfo } from '@/src/features/course/domain/entities/course';
+import React, { createContext, useContext, useState } from 'react';
 import { Alert } from 'react-native';
-import { Group } from '../../domain/entities/group';
-import { Course, StudentInfo } from '../../domain/entities/course';
-import { GetGroupsByCategoryUseCase } from '../../domain/usecases/getGroupsByCategory.usecase';
-import { AssignStudentToGroupUseCase } from '../../domain/usecases/assignStudentToGroup.usecase';
-import { MoveStudentToGroupUseCase } from '../../domain/usecases/moveStudentToGroup.usecase';
-import { FindStudentGroupUseCase } from '../../domain/usecases/findStudentGroup.usecase';
+import { Group } from '../../../group/domain/entities/group';
+import { AssignStudentToGroupUseCase } from '../../../group/domain/usecases/assignStudentToGroup.usecase';
+import { FindStudentGroupUseCase } from '../../../group/domain/usecases/findStudentGroup.usecase';
+import { GetGroupsByCategoryUseCase } from '../../../group/domain/usecases/getGroupsByCategory.usecase';
+import { MoveStudentToGroupUseCase } from '../../../group/domain/usecases/moveStudentToGroup.usecase';
 
 type ProfessorContextType = {
   groups: Group[];
@@ -19,7 +19,7 @@ type ProfessorContextType = {
   loadStudents: (course: Course) => void;
   assignStudentToGroup: (studentId: string, groupId: string) => Promise<boolean>;
   moveStudentToGroup: (studentEmail: string, toGroupId: string) => Promise<boolean>;
-  findStudentGroup: (categoryId: string, studentId: string) => Promise<Group | undefined>;
+  findStudentGroup: (categoryId: string, studentId: string) => Promise<Group | null>;
   assignStudentsRandomly: (categoryId: string) => Promise<void>;
   reassignAllStudentsRandomly: (categoryId: string) => Promise<void>;
   getStudentsNotInAnyGroup: () => string[];
@@ -89,7 +89,7 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
   const assignStudentToGroup = async (studentId: string, groupId: string): Promise<boolean> => {
     setIsAssigningStudent(true);
     try {
-      const result = await assignStudentUseCase.execute(groupId, studentId);
+      const result = await assignStudentUseCase.execute(studentId, groupId);
 
       if (result.isSuccess) {
         Alert.alert('Éxito', result.message);
@@ -110,7 +110,7 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
   const moveStudentToGroup = async (studentEmail: string, toGroupId: string): Promise<boolean> => {
     setIsAssigningStudent(true);
     try {
-      const result = await moveStudentUseCase.execute(toGroupId, studentEmail);
+      const result = await moveStudentUseCase.execute(studentEmail, toGroupId);
 
       if (result.isSuccess) {
         return true;
@@ -125,13 +125,13 @@ export function ProfessorProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const findStudentGroup = async (categoryId: string, studentId: string): Promise<Group | undefined> => {
+  const findStudentGroup = async (categoryId: string, studentId: string): Promise<Group | null> => {
     try {
       const result = await findStudentGroupUseCase.execute(categoryId, studentId);
       return result.group;
     } catch (error) {
       console.error('Error finding student group:', error);
-      return undefined;
+      return null;
     }
   };
 

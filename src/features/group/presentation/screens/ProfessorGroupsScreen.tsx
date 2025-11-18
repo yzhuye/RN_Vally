@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, IconButton, Card, Chip, ActivityIndicator, Button } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { Course } from '../../domain/entities/course';
-import { Category } from '../../domain/entities/category';
-import { CourseDetailHeader } from '../components/CourseDetailHeader';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, Card, Chip, IconButton, Text } from 'react-native-paper';
+import { Category } from '../../../category/domain/entities/category';
+import { Course } from '../../../course/domain/entities/course';
+import { CourseDetailHeader } from '../../../course/presentation/components/CourseDetailHeader';
 import { useProfessor } from '../context/professor.context';
 
 const primaryColor = '#00BCD4';
@@ -17,11 +17,15 @@ type RouteParams = {
     course: Course;
     category: Category;
   };
+  StudentManagement: {
+    course: Course;
+    category: Category;
+  };
 };
 
 export default function ProfessorGroupsScreen() {
   const route = useRoute<RouteProp<RouteParams, 'ProfessorGroups'>>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { 
     groups, 
     isLoading, 
@@ -35,6 +39,7 @@ export default function ProfessorGroupsScreen() {
     groupsWithSpace,
     fullGroups
   } = useProfessor();
+
   
   const [course] = useState<Course>(route.params.course);
   const [category] = useState<Category>(route.params.category);

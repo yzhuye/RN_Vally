@@ -4,9 +4,9 @@ import { PaperProvider } from "react-native-paper";
 
 import { DIProvider } from "./src/core/di/DIProvider";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
+import { CategoryProvider } from "./src/features/category/presentation/context/category.context";
 import { CourseProvider } from "./src/features/course/presentation/context/course.context";
-import { CategoryProvider } from "./src/features/course/presentation/context/category.context";
-import { ProfessorProvider } from "./src/features/course/presentation/context/professor.context";
+import { ProfessorProvider } from "./src/features/group/presentation/context/professor.context";
 import { lightTheme } from "./src/theme/theme";
 
 import AuthFlow from "./src/AuthFlow";

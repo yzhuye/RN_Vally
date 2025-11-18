@@ -2,12 +2,12 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth } from "./features/auth/presentation/context/authContext";
 import LoginScreen from "./features/auth/presentation/screens/LoginScreen";
 import SignupScreen from "./features/auth/presentation/screens/SignupScreen";
-import HomeScreen from "./features/course/presentation/screens/HomeScreen";
+import CourseCategoryScreen from "./features/category/presentation/screens/CourseCategoryScreen";
+import ProfessorCategoryScreen from "./features/category/presentation/screens/ProfessorCategoryScreen";
 import CourseManagementScreen from "./features/course/presentation/screens/CourseManagementScreen";
-import ProfessorCategoryScreen from "./features/course/presentation/screens/ProfessorCategoryScreen";
-import CourseCategoryScreen from "./features/course/presentation/screens/CourseCategoryScreen";
-import ProfessorGroupsScreen from "./features/course/presentation/screens/ProfessorGroupsScreen";
-import StudentManagementScreen from "./features/course/presentation/screens/StudentManagementScreen";
+import HomeScreen from "./features/course/presentation/screens/HomeScreen";
+import ProfessorGroupsScreen from "./features/group/presentation/screens/ProfessorGroupsScreen";
+import StudentManagementScreen from "./features/group/presentation/screens/StudentManagementScreen";
 
 const Stack = createStackNavigator();
 

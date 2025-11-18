@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, IconButton, Card, Chip, ActivityIndicator, Button, Menu } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { Course } from '../../domain/entities/course';
-import { Category } from '../../domain/entities/category';
-import { CourseDetailHeader } from '../components/CourseDetailHeader';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Button, Card, Chip, IconButton, Menu, Text } from 'react-native-paper';
+import { Category } from '../../../category/domain/entities/category';
+import { Course } from '../../../course/domain/entities/course';
+import { CourseDetailHeader } from '../../../course/presentation/components/CourseDetailHeader';
 import { useProfessor } from '../context/professor.context';
 
 const primaryColor = '#00BCD4';
@@ -372,14 +372,6 @@ export default function StudentManagementScreen() {
                           }}
                           title="Cambiar de grupo"
                           leadingIcon="swap-horizontal"
-                        />
-                        <Menu.Item
-                          onPress={() => {
-                            setMenuVisible(null);
-                            handleRemoveStudent(studentEmail, currentGroup);
-                          }}
-                          title="Quitar del grupo"
-                          leadingIcon="account-remove"
                         />
                       </>
                     ) : (

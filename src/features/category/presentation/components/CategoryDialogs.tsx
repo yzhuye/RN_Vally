@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Dialog, Portal, Button, TextInput, RadioButton, Text } from 'react-native-paper';
-import { Category } from '../../domain/entities/category';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Button, Dialog, Portal, RadioButton, Text, TextInput } from 'react-native-paper';
+import { Category } from '../../../category/domain/entities/category';
 
 interface AddCategoryDialogProps {
   visible: boolean;

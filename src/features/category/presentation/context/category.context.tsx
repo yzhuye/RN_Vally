@@ -1,13 +1,13 @@
 import { useDI } from '@/src/core/di/DIProvider';
 import { TOKENS } from '@/src/core/di/tokens';
+import { CreateGroupsForCategoryUseCase } from '@/src/features/group/domain/usecases/createGroupsForCategory.usecase';
 import React, { createContext, useContext, useState } from 'react';
 import { Alert } from 'react-native';
-import { Category } from '../../domain/entities/category';
-import { AddCategoryUseCase } from '../../domain/usecases/addCategory.usecase';
-import { CreateGroupsForCategoryUseCase } from '../../domain/usecases/createGroupsForCategory.usecase';
-import { DeleteCategoryUseCase } from '../../domain/usecases/deleteCategory.usecase';
-import { GetCategoriesUseCase } from '../../domain/usecases/getCategories.usecase';
-import { UpdateCategoryUseCase } from '../../domain/usecases/updateCategory.usecase';
+import { Category } from '../../../category/domain/entities/category';
+import { AddCategoryUseCase } from '../../../category/domain/usecases/addCategory.usecase';
+import { DeleteCategoryUseCase } from '../../../category/domain/usecases/deleteCategory.usecase';
+import { GetCategoriesUseCase } from '../../../category/domain/usecases/getCategories.usecase';
+import { UpdateCategoryUseCase } from '../../../category/domain/usecases/updateCategory.usecase';
 
 type CategoryContextType = {
   categories: Category[];
@@ -35,7 +35,6 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const loadCategories = async (courseId: string) => {
-    console.log('Loading categories for courseId:', courseId);
     setIsLoading(true);
     try {
       const categoriesData = await getCategoriesUseCase.execute(courseId);
@@ -58,13 +57,11 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const result = await addCategoryUseCase.execute(courseId, name, groupingMethod, groupCount, studentsPerGroup);
-      console.log('Add category result:', result);
       if (result.isSuccess && result.category) {
         await loadCategories(courseId);
         // Crear grupos para la nueva categoría
-        /*
+        
         const groupsResult = await createGroupsUseCase.execute(
-          courseId,
           result.category.id,
           groupCount,
           studentsPerGroup,
@@ -77,7 +74,7 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
         } else {
           Alert.alert('Advertencia', `Categoría creada pero error al crear grupos: ${groupsResult.message}`);
         }
-        */
+        
       } else {
         Alert.alert('Error', result.message);
       }
