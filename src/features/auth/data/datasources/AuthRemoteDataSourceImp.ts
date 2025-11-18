@@ -198,6 +198,18 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return null; // No token means not logged in
       }
       
+      // Verify that the token is still valid
+      const isTokenValid = await this.verifyToken();
+      
+      if (!isTokenValid) {
+        // Token is invalid or expired, clear stored data
+        await this.prefs.removeData("token");
+        await this.prefs.removeData("refreshToken");
+        await this.prefs.removeData("username");
+        await this.prefs.removeData("email");
+        return null;
+      }
+      
       return {
         email: email || "",
         password: "",
