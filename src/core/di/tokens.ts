@@ -35,4 +35,12 @@ export const TOKENS = {
   MoveStudentToGroupUC: Symbol("MoveStudentToGroupUC"),
   FindStudentGroupUC: Symbol("FindStudentGroupUC"),
   JoinGroupUC: Symbol("JoinGroupUC"),
+  // Activity tokens
+  ActivityRemoteDS: Symbol("ActivityRemoteDS"),
+  ActivityRepo: Symbol("ActivityRepo"),
+  CreateActivityUC: Symbol("CreateActivityUC"),
+  GetActivitiesByCategoryUC: Symbol("GetActivitiesByCategoryUC"),
+  GetActivityByIdUC: Symbol("GetActivityByIdUC"),
+  UpdateActivityUC: Symbol("UpdateActivityUC"),
+  DeleteActivityUC: Symbol("DeleteActivityUC"),
 } as const;

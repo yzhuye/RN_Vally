@@ -36,6 +36,15 @@ import { GetGroupsByCategoryUseCase } from "@/src/features/group/domain/usecases
 import { JoinGroupUseCase } from "@/src/features/group/domain/usecases/joinGroup.usecase";
 import { MoveStudentToGroupUseCase } from "@/src/features/group/domain/usecases/moveStudentToGroup.usecase";
 
+// Activity imports
+import { ActivityRemoteDataSourceImpl } from "@/src/features/activity/data/datasources/activity.remoteDataSourceImp";
+import { ActivityRepositoryImpl } from "@/src/features/activity/data/repositories/activity.repositoryImpl";
+import { CreateActivityUseCase } from "@/src/features/activity/domain/usecases/createActivity.usecases";
+import { GetActivitiesByCategoryUseCase } from "@/src/features/activity/domain/usecases/getActivityByCategory.usecases";
+import { GetActivityByIdUseCase } from "@/src/features/activity/domain/usecases/getActivityById.usecases";
+import { UpdateActivityUseCase } from "@/src/features/activity/domain/usecases/updateActivity.usecases";
+import { DeleteActivityUseCase } from "@/src/features/activity/domain/usecases/deleteActivity.usecases";
+
 
 const DIContext = createContext<Container | null>(null);
 
@@ -88,6 +97,18 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.MoveStudentToGroupUC, new MoveStudentToGroupUseCase(groupRepo))
             .register(TOKENS.FindStudentGroupUC, new FindStudentGroupUseCase(groupRepo))
             .register(TOKENS.JoinGroupUC, new JoinGroupUseCase(groupRepo));
+
+        // Activity DI registrations
+        const activityRemoteDS = new ActivityRemoteDataSourceImpl(authDS);
+        const activityRepo = new ActivityRepositoryImpl(activityRemoteDS);
+
+        c.register(TOKENS.ActivityRemoteDS, activityRemoteDS)
+            .register(TOKENS.ActivityRepo, activityRepo)
+            .register(TOKENS.CreateActivityUC, new CreateActivityUseCase(activityRepo))
+            .register(TOKENS.GetActivitiesByCategoryUC, new GetActivitiesByCategoryUseCase(activityRepo))
+            .register(TOKENS.GetActivityByIdUC, new GetActivityByIdUseCase(activityRepo))
+            .register(TOKENS.UpdateActivityUC, new UpdateActivityUseCase(activityRepo))
+            .register(TOKENS.DeleteActivityUC, new DeleteActivityUseCase(activityRepo));
 
         return c;
     }, []);
