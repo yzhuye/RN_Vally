@@ -116,9 +116,16 @@ export default function HomeScreen() {
       </View>
       
       <View style={styles.searchContainer}>
+        <IconButton
+          icon="magnify"
+          size={24}
+          iconColor="#757575"
+          style={styles.searchIcon}
+        />
         <RNTextInput
           style={styles.searchInput}
-          placeholder="Buscar..."
+          placeholder="Buscar cursos..."
+          placeholderTextColor="#9E9E9E"
           value={searchQuery}
           onChangeText={handleSearch}
         />
@@ -163,9 +170,17 @@ export default function HomeScreen() {
         style={styles.mainButton}
         onPress={() => selectedUserType === 'Profesor' ? setCreateDialogVisible(true) : setJoinDialogVisible(true)}
       >
-        <Text style={styles.mainButtonText}>
-          {buttonText}
-        </Text>
+        <View style={styles.mainButtonContent}>
+          <IconButton
+            icon={selectedUserType === 'Profesor' ? "plus" : "login"}
+            size={20}
+            iconColor="#00A4BD"
+            style={styles.mainButtonIcon}
+          />
+          <Text style={styles.mainButtonText}>
+            {buttonText}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <Portal>
@@ -267,11 +282,18 @@ const styles = StyleSheet.create({
   searchContainer: {
     width: "100%",
     marginBottom: 20,
-  },
-  searchInput: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#F5F5F5",
     borderRadius: 10,
-    paddingHorizontal: 15,
+  },
+  searchIcon: {
+    margin: 0,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
     paddingVertical: 12,
     fontSize: 16,
     borderWidth: 0,
@@ -289,10 +311,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 10,
   },
+  mainButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mainButtonIcon: {
+    margin: 0,
+  },
   mainButtonText: {
     color: "#00A4BD",
     fontSize: 16,
     fontWeight: "600",
+    marginLeft: -8,
   },
   card: {
     width: "100%",

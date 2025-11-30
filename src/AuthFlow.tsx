@@ -2,12 +2,17 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth } from "./features/auth/presentation/context/authContext";
 import LoginScreen from "./features/auth/presentation/screens/LoginScreen";
 import SignupScreen from "./features/auth/presentation/screens/SignupScreen";
+import ActivityManagementScreen from "./features/activity/presentation/screens/ActivityManagementScreen";
+import CategoryActivityScreen from "./features/activity/presentation/screens/CategoryActivityScreen";
+import EvaluationFormScreen from "./features/activity/presentation/screens/EvaluationFormScreen";
+import StudentEvaluationScreen from "./features/activity/presentation/screens/StudentEvaluationScreen";
 import CourseCategoryScreen from "./features/category/presentation/screens/CourseCategoryScreen";
 import ProfessorCategoryScreen from "./features/category/presentation/screens/ProfessorCategoryScreen";
 import CourseManagementScreen from "./features/course/presentation/screens/CourseManagementScreen";
 import HomeScreen from "./features/course/presentation/screens/HomeScreen";
 import ProfessorGroupsScreen from "./features/group/presentation/screens/ProfessorGroupsScreen";
 import StudentManagementScreen from "./features/group/presentation/screens/StudentManagementScreen";
+import ReportScreen from "./features/report/presentation/screens/ReportScreen";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +29,11 @@ export default function AuthFlow() {
           <Stack.Screen name="CourseCategory" component={CourseCategoryScreen} />
           <Stack.Screen name="ProfessorGroups" component={ProfessorGroupsScreen} />
           <Stack.Screen name="StudentManagement" component={StudentManagementScreen} />
+          <Stack.Screen name="ActivityManagement" component={ActivityManagementScreen} />
+          <Stack.Screen name="CategoryActivity" component={CategoryActivityScreen} />
+          <Stack.Screen name="StudentEvaluation" component={StudentEvaluationScreen} />
+          <Stack.Screen name="EvaluationForm" component={EvaluationFormScreen} />
+          <Stack.Screen name="Report" component={ReportScreen} />
         </>
       ) : (
         <>
