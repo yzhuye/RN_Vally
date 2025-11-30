@@ -1,7 +1,7 @@
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import { Text, IconButton, Surface, Button, Chip } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, IconButton, Surface, Text } from 'react-native-paper';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';

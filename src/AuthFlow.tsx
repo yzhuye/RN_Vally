@@ -1,11 +1,11 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import { useAuth } from "./features/auth/presentation/context/authContext";
-import LoginScreen from "./features/auth/presentation/screens/LoginScreen";
-import SignupScreen from "./features/auth/presentation/screens/SignupScreen";
 import ActivityManagementScreen from "./features/activity/presentation/screens/ActivityManagementScreen";
 import CategoryActivityScreen from "./features/activity/presentation/screens/CategoryActivityScreen";
 import EvaluationFormScreen from "./features/activity/presentation/screens/EvaluationFormScreen";
 import StudentEvaluationScreen from "./features/activity/presentation/screens/StudentEvaluationScreen";
+import { useAuth } from "./features/auth/presentation/context/authContext";
+import LoginScreen from "./features/auth/presentation/screens/LoginScreen";
+import SignupScreen from "./features/auth/presentation/screens/SignupScreen";
 import CourseCategoryScreen from "./features/category/presentation/screens/CourseCategoryScreen";
 import ProfessorCategoryScreen from "./features/category/presentation/screens/ProfessorCategoryScreen";
 import CourseManagementScreen from "./features/course/presentation/screens/CourseManagementScreen";
