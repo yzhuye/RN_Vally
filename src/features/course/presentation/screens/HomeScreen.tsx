@@ -158,7 +158,17 @@ export default function HomeScreen() {
         ) : (
           filteredCourses.map((course) => (
             <Card key={course._id} style={styles.card} onPress={() => handleCoursePress(course)}>
-              {course.imageUrl && <Card.Cover source={{ uri: course.imageUrl }} />}
+              {course.imageUrl ? (
+                <Card.Cover source={{ uri: course.imageUrl }} style={styles.cardCover} />
+              ) : (
+                <View style={styles.placeholderContainer}>
+                  <IconButton
+                    icon="play-circle-outline"
+                    size={48}
+                    iconColor="#00A4BD"
+                  />
+                </View>
+              )}
               <Card.Title title={course.title} titleStyle={styles.cardTitle}/>
               <Card.Content>
                 <Text variant="bodyMedium">{course.description}</Text>
@@ -347,6 +357,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    overflow: "hidden",
+  },
+  cardCover: {
+    height: 120,
+  },
+  placeholderContainer: {
+    height: 120,
+    width: "100%",
+    backgroundColor: "rgba(122, 234, 251, 1)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardTitle: {
     fontWeight: "bold",
