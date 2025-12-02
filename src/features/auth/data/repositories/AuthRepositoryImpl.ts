@@ -18,6 +18,7 @@ export class AuthRepositoryImpl implements AuthRepository {
     
     // For signup, return a basic user object since the backend might not store username yet
     return { 
+      id: "",
       email, 
       password: "", 
       username: email.split("@")[0]
@@ -30,5 +31,9 @@ export class AuthRepositoryImpl implements AuthRepository {
 
   async getCurrentUser(): Promise<AuthUser | null> {
     return this.dataSource.getCurrentUser();
+  }
+
+  async getUserIdByEmail(email: string): Promise<string | null> {
+    return this.dataSource.getUserIdByEmail(email);
   }
 }

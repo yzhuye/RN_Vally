@@ -103,7 +103,6 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-    console.log('Updated category:', category)
   };
 
   const deleteCategory = async (courseId: string, categoryId: string) => {

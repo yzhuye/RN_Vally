@@ -4,6 +4,7 @@ import { useDI } from "@/src/core/di/DIProvider";
 import { TOKENS } from "@/src/core/di/tokens";
 import { AuthUser } from "../../domain/entities/AuthUser";
 import { GetCurrentUserUseCase } from "../../domain/usecases/GetCurrentUserUseCase";
+import { GetUserIdByEmailUseCase } from "../../domain/usecases/GetUserIdByEmailUseCase";
 import { LoginUseCase } from "../../domain/usecases/LoginUseCase";
 import { LogoutUseCase } from "../../domain/usecases/LogoutUseCase";
 import { SignupUseCase } from "../../domain/usecases/SignupUseCase";
@@ -23,6 +24,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  getUserIdByEmail: (email: string) => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signupUseCase = di.resolve<SignupUseCase>(TOKENS.SignupUC);
   const logoutUseCase = di.resolve<LogoutUseCase>(TOKENS.LogoutUC);
   const getCurrentUserUseCase = di.resolve<GetCurrentUserUseCase>(TOKENS.GetCurrentUserUC);
+  const getUserIdByEmailUseCase = di.resolve<GetUserIdByEmailUseCase>(TOKENS.GetUserIdByEmailUC);
 
 
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -66,8 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoggedIn(false);
   };
 
+  const getUserIdByEmail = async (email: string): Promise<string | null> => {
+    return await getUserIdByEmailUseCase.execute(email);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoggedIn }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isLoggedIn, getUserIdByEmail }}>
       {children}
     </AuthContext.Provider>
   );

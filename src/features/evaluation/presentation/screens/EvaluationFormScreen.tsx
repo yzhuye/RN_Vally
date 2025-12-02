@@ -1,8 +1,10 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, IconButton, Surface, Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useAuth } from '../../../auth/presentation/context/authContext';
+import { useEvaluation } from '../context/evaluation.context';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';
@@ -33,7 +35,8 @@ type RouteParams = {
     course: Course;
     category: Category;
     activity: Activity;
-    evaluatedEmail: string;
+    evaluatedEmail?: string;
+    evaluatedId?: string;
     studentEmail: string;
   };
 };
@@ -41,14 +44,19 @@ type RouteParams = {
 export default function EvaluationFormScreen() {
   const route = useRoute<RouteProp<RouteParams, 'EvaluationForm'>>();
   const navigation = useNavigation();
-  const { course, category, activity, evaluatedEmail, studentEmail } = route.params;
+  const { course, category, activity, evaluatedEmail, evaluatedId, studentEmail } = route.params;
+  const { user, getUserIdByEmail } = useAuth();
+  
+  // Evaluation context
+  const { createEvaluation, isLoading: evaluationLoading } = useEvaluation();
 
   // Métricas de evaluación (0-5 estrellas)
   const [punctuality, setPunctuality] = useState(3);
   const [contributions, setContributions] = useState(3);
   const [commitment, setCommitment] = useState(3);
   const [attitude, setAttitude] = useState(3);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const isLoading = evaluationLoading;
 
   const getDueDateColor = (dueDate: Date): string => {
     const now = new Date();
@@ -76,15 +84,43 @@ export default function EvaluationFormScreen() {
   };
 
   const handleSubmitEvaluation = async () => {
-    setIsLoading(true);
-    
-    // TODO: Implement actual API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsLoading(false);
-    Alert.alert('Éxito', 'Evaluación enviada correctamente', [
-      { text: 'OK', onPress: () => navigation.goBack() }
-    ]);
+    try {
+      // Get evaluator ID - use current user ID if available
+      let evaluatorId: string | null = user?.id || null;
+      if (!evaluatorId && user?.email) {
+        evaluatorId = await getUserIdByEmail(user.email);
+      }
+      if (!evaluatorId) {
+        evaluatorId = await getUserIdByEmail(studentEmail);
+      }
+
+      // Get evaluated ID - prefer provided ID, fallback to resolving from email
+      let resolvedEvaluatedId: string | null = evaluatedId || null;
+      if (!resolvedEvaluatedId && evaluatedEmail) {
+        resolvedEvaluatedId = await getUserIdByEmail(evaluatedEmail);
+      }
+
+      if (!evaluatorId || !resolvedEvaluatedId) {
+        console.error('Could not resolve user IDs for evaluation');
+        return;
+      }
+
+      const success = await createEvaluation({
+        activityId: activity.id,
+        evaluatorId: evaluatorId,
+        evaluatedId: resolvedEvaluatedId,
+        punctuality,
+        contributions,
+        commitment,
+        attitude
+      });
+
+      if (success) {
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.error('Error submitting evaluation:', error);
+    }
   };
 
   const renderStars = (
@@ -197,12 +233,12 @@ export default function EvaluationFormScreen() {
           <View style={styles.evaluatedCard}>
             <View style={styles.evaluatedAvatar}>
               <Text style={styles.evaluatedAvatarText}>
-                {evaluatedEmail.substring(0, 1).toUpperCase()}
+                {(evaluatedEmail || 'U').substring(0, 1).toUpperCase()}
               </Text>
             </View>
             <View style={styles.evaluatedInfo}>
               <Text style={styles.evaluatedLabel}>Evaluando a:</Text>
-              <Text style={styles.evaluatedEmail}>{evaluatedEmail}</Text>
+              <Text style={styles.evaluatedEmail}>{evaluatedEmail || 'Usuario desconocido'}</Text>
             </View>
           </View>
 

@@ -3,50 +3,25 @@ import { EvaluationRepository } from "../repositories/evaluation.repository";
 
 export class UpdateEvaluationUseCase {
     constructor(private readonly repository: EvaluationRepository) {}
-    async execute(params: {
-        evaluationId: string;
-        punctuality: number;
-        contributions: number;
-        commitment: number;
-        attitude: number;
-    }): Promise<UpdateEvaluationResult> {
+    
+    async execute(evaluation: Evaluation): Promise<{ isSuccess: boolean; message: string }> {
         try {
-            // Get existing evaluation
-            const existingEvaluation = await this.repository.getEvaluationById(params.evaluationId);
-            if (!existingEvaluation) {
-                return UpdateEvaluationResult.failure('Evaluación no encontrada.');
+            // Validate ratings are in valid range
+            const ratings = [evaluation.punctuality, evaluation.contributions, evaluation.commitment, evaluation.attitude];
+            if (ratings.some(rating => rating < 0 || rating > 5)) {
+                return {
+                    isSuccess: false,
+                    message: "Las puntuaciones deben estar entre 0 y 5."
+                };
             }
-            // Create updated evaluation
-            const updatedEvaluation = new Evaluation(
-                existingEvaluation.id,
-                existingEvaluation.activityId,
-                existingEvaluation.evaluatorId,
-                existingEvaluation.evaluatedId,
-                params.punctuality,
-                params.contributions,
-                params.commitment,
-                params.attitude,
-                existingEvaluation.createdAt
-            );
-            await this.repository.updateEvaluation(updatedEvaluation);
-            return UpdateEvaluationResult.success('Evaluación actualizada exitosamente.', updatedEvaluation);
-        }
-        catch (e) {
-            return UpdateEvaluationResult.failure(`Error al actualizar evaluación: ${e}`);
-        }
-    }
-}
 
-export class UpdateEvaluationResult {
-    private constructor(
-        public readonly isSuccess: boolean,
-        public readonly message: string,
-        public readonly evaluation: Evaluation | null,
-    ) {}
-    static success(message: string, evaluation: Evaluation): UpdateEvaluationResult {
-        return new UpdateEvaluationResult(true, message, evaluation);
-    }
-    static failure(message: string): UpdateEvaluationResult {
-        return new UpdateEvaluationResult(false, message, null);
+            return await this.repository.updateEvaluation(evaluation);
+        } catch (error) {
+            console.error('Error in UpdateEvaluationUseCase:', error);
+            return {
+                isSuccess: false,
+                message: `Error al actualizar evaluación: ${(error as Error).message}`
+            };
+        }
     }
 }

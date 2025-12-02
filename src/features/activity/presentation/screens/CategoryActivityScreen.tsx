@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
 import { useAuth } from '../../../auth/presentation/context/authContext';
+import { useEvaluation } from '../../../evaluation/presentation/context/evaluation.context';
 import { useGroup } from '../../../group/presentation/context/group.context';
-import { Activity as ActivityEntity } from '../../domain/entities/activity';
+import { Activity } from '../../domain/entities/activity';
 import { useActivity } from '../context/activity.context';
 
 const primaryColor = '#00A4BD';
@@ -64,8 +65,16 @@ export default function CategoryActivityScreen() {
     canJoinGroup: canJoinGroupFn
   } = useGroup();
 
+  // Evaluation context
+  const { 
+    evaluations,
+    isLoading: evaluationsLoading,
+    loadEvaluations,
+    getEvaluationCount 
+  } = useEvaluation();
+
   const [showActivities, setShowActivities] = useState(true);
-  const isLoading = activitiesLoading || groupsLoading;
+  const isLoading = activitiesLoading || groupsLoading || evaluationsLoading;
 
   // Load data on component mount
   useEffect(() => {
@@ -75,16 +84,20 @@ export default function CategoryActivityScreen() {
     }
   }, [category.id]);
 
+  // Load evaluations when activities are loaded
+  useEffect(() => {
+    if (activities.length > 0) {
+      activities.forEach(activity => {
+        loadEvaluations(activity.id);
+      });
+    }
+  }, [activities.length]); // Using length instead of the whole array
+
   const isActivityExpired = (dueDate: Date): boolean => {
     return dueDate < new Date();
   };
 
-  const getEvaluationCount = (activityId: string): number => {
-    // TODO: Implement actual evaluation count logic
-    return 0;
-  };
-
-  const navigateToEvaluation = (activity: ActivityEntity) => {
+  const navigateToEvaluation = (activity: Activity) => {
     if (isActivityExpired(activity.dueDate)) {
       Alert.alert('Actividad Vencida', 'Esta actividad ya ha vencido');
       return;
@@ -119,10 +132,11 @@ export default function CategoryActivityScreen() {
     );
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     if (category.id) {
-      loadActivities(category.id);
-      loadGroups(category.id);
+      await loadActivities(category.id);
+      await loadGroups(category.id);
+      // Note: evaluations will be loaded automatically when activities update
     }
   };
 

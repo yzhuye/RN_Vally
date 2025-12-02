@@ -1,25 +1,16 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
+import { useAuth } from '../../../auth/presentation/context/authContext';
+import { useGroup } from '../../../group/presentation/context/group.context';
+import { useEvaluation } from '../context/evaluation.context';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';
 const primaryTextColor = '#212121';
 const backgroundColor = '#F5F7FA';
 const cardBackgroundColor = '#FFFFFF';
-
-type Evaluation = {
-  id: string;
-  activityId: string;
-  evaluatedId: string;
-  evaluatorId: string;
-  punctuality: number;
-  contributions: number;
-  commitment: number;
-  attitude: number;
-  createdAt: Date;
-};
 
 type Activity = {
   id: string;
@@ -39,13 +30,6 @@ type Course = {
   description: string;
 };
 
-type GroupMember = {
-  email: string;
-  hasEvaluated: boolean;
-  canEvaluate: boolean;
-  isChecking: boolean;
-};
-
 type RouteParams = {
   StudentEvaluation: {
     course: Course;
@@ -59,10 +43,74 @@ export default function StudentEvaluationScreen() {
   const route = useRoute<RouteProp<RouteParams, 'StudentEvaluation'>>();
   const navigation = useNavigation();
   const { course, category, activity, studentEmail } = route.params;
+  const { user, getUserIdByEmail } = useAuth();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
-  const [myEvaluations, setMyEvaluations] = useState<Evaluation[]>([]);
+  // Group context
+  const {
+    groups,
+    isLoading: groupsLoading,
+    loadGroups,
+    currentGroup
+  } = useGroup();
+
+  // Evaluation context
+  const { 
+    evaluations,
+    isLoading: evaluationsLoading,
+    loadEvaluations,
+    checkEligibility,
+    hasEvaluated: hasEvaluatedFromContext
+  } = useEvaluation();
+
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState<{ [key: string]: boolean }>({});
+  const [memberEvaluationStatus, setMemberEvaluationStatus] = useState<{ [key: string]: boolean }>({});
+  
+  const isLoading = groupsLoading || evaluationsLoading;
+
+  // Get group members (excluding current user)
+  const groupMembers = currentGroup?.members.filter(member => member !== (user?.email || studentEmail)) || [];
+
+  // Load data on component mount
+  useEffect(() => {
+    if (category.id && activity.id) {
+      loadGroups(category.id);
+      loadEvaluations(activity.id);
+    }
+  }, [category.id, activity.id]);
+
+  // Check evaluation status for all group members when evaluations or members change
+  useEffect(() => {
+    const checkEvaluationStatus = async () => {
+      if (!groupMembers.length || !user?.id) return;
+
+      const statusMap: { [key: string]: boolean } = {};
+      
+      for (const memberEmail of groupMembers) {
+        try {
+          // Get the member's user ID
+          const memberUserId = await getUserIdByEmail(memberEmail);
+          if (memberUserId) {
+            // Check if current user has evaluated this member
+            const hasEvaluated = evaluations.some(evaluation => 
+              evaluation.activityId === activity.id && 
+              evaluation.evaluatorId === user.id && 
+              evaluation.evaluatedId === memberUserId
+            );
+            statusMap[memberEmail] = hasEvaluated;
+          } else {
+            statusMap[memberEmail] = false;
+          }
+        } catch (error) {
+          console.error('Error checking evaluation status for', memberEmail, error);
+          statusMap[memberEmail] = false;
+        }
+      }
+      
+      setMemberEvaluationStatus(statusMap);
+    };
+
+    checkEvaluationStatus();
+  }, [groupMembers, evaluations, user?.id, activity.id, getUserIdByEmail]);
 
   const getDueDateColor = (dueDate: Date): string => {
     const now = new Date();
@@ -90,9 +138,46 @@ export default function StudentEvaluationScreen() {
   };
 
   const hasEvaluated = (memberEmail: string): boolean => {
-    return myEvaluations.some(
-      (evaluation) => evaluation.activityId === activity.id && evaluation.evaluatedId === memberEmail
-    );
+    // Use the cached evaluation status from state
+    return memberEvaluationStatus[memberEmail] || false;
+  };
+
+  const checkMemberEligibility = async (memberEmail: string): Promise<boolean> => {
+    try {
+      setIsCheckingEligibility(prev => ({ ...prev, [memberEmail]: true }));
+      
+      // Get user IDs - we need actual IDs for the evaluation system
+      const evaluatorEmail = user?.email || studentEmail;
+      let evaluatorId: string | null = user?.id || null;
+      if (!evaluatorId) {
+        evaluatorId = await getUserIdByEmail(evaluatorEmail);
+      }
+      let evaluatedId: string | null = await getUserIdByEmail(memberEmail);
+      
+      // If we can't get user IDs, we can't perform the evaluation
+      if (!evaluatorId) {
+        console.warn('Could not get evaluator ID for:', evaluatorEmail);
+        return false;
+      }
+      if (!evaluatedId) {
+        console.warn('Could not get evaluated ID for:', memberEmail);
+        return false;
+      }
+      
+      const result = await checkEligibility({
+        activityId: activity.id,
+        courseId: course.id,
+        evaluatorId: evaluatorId,
+        evaluatedId: evaluatedId
+      });
+      
+      return result.isEligible;
+    } catch (error) {
+      console.error('Error checking member eligibility:', error);
+      return false;
+    } finally {
+      setIsCheckingEligibility(prev => ({ ...prev, [memberEmail]: false }));
+    }
   };
 
   const navigateToEvaluationForm = (evaluatedEmail: string) => {
@@ -101,33 +186,46 @@ export default function StudentEvaluationScreen() {
       category,
       activity,
       evaluatedEmail,
-      studentEmail,
+      studentEmail: user?.email || studentEmail,
     });
   };
 
-  const showEvaluationDetails = (memberEmail: string) => {
-    const evaluation = myEvaluations.find(
-      (evaluation) => evaluation.activityId === activity.id && evaluation.evaluatedId === memberEmail
-    );
+  const showEvaluationDetails = async (memberEmail: string) => {
+    try {
+      if (!user?.id) return;
 
-    if (!evaluation) return;
+      // Get the member's user ID
+      const memberUserId = await getUserIdByEmail(memberEmail);
+      if (!memberUserId) return;
 
-    const average = (
-      evaluation.punctuality +
-      evaluation.contributions +
-      evaluation.commitment +
-      evaluation.attitude
-    ) / 4.0;
+      // Find the evaluation using user IDs
+      const evaluation = evaluations.find(
+        (evaluation) => evaluation.activityId === activity.id && 
+                       evaluation.evaluatorId === user.id && 
+                       evaluation.evaluatedId === memberUserId
+      );
 
-    Alert.alert(
-      `Evaluación de ${memberEmail}`,
-      `Puntualidad: ${evaluation.punctuality}/5\n` +
-      `Contribuciones: ${evaluation.contributions}/5\n` +
-      `Compromiso: ${evaluation.commitment}/5\n` +
-      `Actitud: ${evaluation.attitude}/5\n\n` +
-      `Promedio: ${average.toFixed(1)}/5.0`,
-      [{ text: 'Cerrar' }]
-    );
+      if (!evaluation) return;
+
+      const average = (
+        evaluation.punctuality +
+        evaluation.contributions +
+        evaluation.commitment +
+        evaluation.attitude
+      ) / 4.0;
+
+      Alert.alert(
+        `Evaluación de ${memberEmail}`,
+        `Puntualidad: ${evaluation.punctuality}/5\n` +
+        `Contribuciones: ${evaluation.contributions}/5\n` +
+        `Compromiso: ${evaluation.commitment}/5\n` +
+        `Actitud: ${evaluation.attitude}/5\n\n` +
+        `Promedio: ${average.toFixed(1)}/5.0`,
+        [{ text: 'Cerrar' }]
+      );
+    } catch (error) {
+      console.error('Error showing evaluation details:', error);
+    }
   };
 
   const isExpired = isActivityExpired(activity.dueDate);
@@ -205,18 +303,19 @@ export default function StudentEvaluationScreen() {
               </Text>
             </View>
           ) : (
-            groupMembers.map((member) => {
-              const memberHasEvaluated = hasEvaluated(member.email);
+            groupMembers.map((memberEmail) => {
+              const memberHasEvaluated = hasEvaluated(memberEmail);
+              const isCheckingMember = isCheckingEligibility[memberEmail] || false;
 
               return (
-                <View key={member.email} style={styles.memberCard}>
+                <View key={memberEmail} style={styles.memberCard}>
                   <View style={styles.memberAvatar}>
                     <Text style={styles.memberAvatarText}>
-                      {member.email.substring(0, 1).toUpperCase()}
+                      {memberEmail.substring(0, 1).toUpperCase()}
                     </Text>
                   </View>
                   <View style={styles.memberInfo}>
-                    <Text style={styles.memberEmail}>{member.email}</Text>
+                    <Text style={styles.memberEmail}>{memberEmail}</Text>
                     <View style={styles.memberStatus}>
                       {memberHasEvaluated ? (
                         <Chip
@@ -234,21 +333,13 @@ export default function StudentEvaluationScreen() {
                         >
                           Tiempo vencido
                         </Chip>
-                      ) : member.isChecking ? (
+                      ) : isCheckingMember ? (
                         <Chip
                           mode="flat"
                           style={styles.checkingChip}
                           textStyle={styles.checkingChipText}
                         >
                           Comprobando...
-                        </Chip>
-                      ) : !member.canEvaluate ? (
-                        <Chip
-                          mode="flat"
-                          style={styles.unavailableChip}
-                          textStyle={styles.unavailableChipText}
-                        >
-                          No disponible
                         </Chip>
                       ) : (
                         <Chip
@@ -261,13 +352,10 @@ export default function StudentEvaluationScreen() {
                       )}
                     </View>
                   </View>
-                  {!memberHasEvaluated &&
-                  !isExpired &&
-                  !member.isChecking &&
-                  member.canEvaluate ? (
+                  {!memberHasEvaluated && !isExpired && !isCheckingMember ? (
                     <Button
                       mode="contained"
-                      onPress={() => navigateToEvaluationForm(member.email)}
+                      onPress={() => navigateToEvaluationForm(memberEmail)}
                       style={styles.evaluateButton}
                       buttonColor={primaryColor}
                       textColor="#FFFFFF"
@@ -280,7 +368,7 @@ export default function StudentEvaluationScreen() {
                       icon="eye"
                       size={24}
                       iconColor={primaryColor}
-                      onPress={() => showEvaluationDetails(member.email)}
+                      onPress={() => showEvaluationDetails(memberEmail)}
                     />
                   ) : null}
                 </View>

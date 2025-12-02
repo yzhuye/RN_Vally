@@ -1,20 +1,10 @@
 import { Evaluation } from "../entities/evaluation";
 import { EvaluationRepository } from "../repositories/evaluation.repository";
-import { ActivityRepository } from "@/src/features/activity/domain/repositories/activity.repository";
 
 export class CreateEvaluationUseCase {
-    private evaluationRepository: EvaluationRepository;
-    private activityRepository: ActivityRepository;
+    constructor(private evaluationRepository: EvaluationRepository) {}
 
-    constructor(
-        evaluationRepository: EvaluationRepository,
-        activityRepository: ActivityRepository
-    ) {
-        this.evaluationRepository = evaluationRepository;
-        this.activityRepository = activityRepository;
-    }
-
-    async call(params: {
+    async execute(params: {
         activityId: string;
         evaluatorId: string;
         evaluatedId: string;
@@ -22,7 +12,7 @@ export class CreateEvaluationUseCase {
         contributions: number;
         commitment: number;
         attitude: number;
-    }): Promise<CreateEvaluationResult> {
+    }): Promise<{ isSuccess: boolean; message: string; evaluation?: Evaluation }> {
         const {
             activityId,
             evaluatorId,
@@ -36,89 +26,51 @@ export class CreateEvaluationUseCase {
         try {
             // Validación: evitar autoevaluación
             if (evaluatorId === evaluatedId) {
-                return CreateEvaluationResult.failure(
-                    "No puedes evaluarte a ti mismo."
-                );
+                return {
+                    isSuccess: false,
+                    message: "No puedes evaluarte a ti mismo."
+                };
             }
 
-            // Validar que la actividad existe
-            const activity = this.activityRepository.getActivityById(activityId);
-            if (!activity) {
-                return CreateEvaluationResult.failure("Actividad no encontrada.");
+            // Validar rangos de puntuación (0-5)
+            const ratings = [punctuality, contributions, commitment, attitude];
+            if (ratings.some(rating => rating < 0 || rating > 5)) {
+                return {
+                    isSuccess: false,
+                    message: "Las puntuaciones deben estar entre 0 y 5."
+                };
             }
 
             // Verificar evaluación previa
-            const alreadyEvaluated =
-                await this.evaluationRepository.hasEvaluated(
-                    activityId,
-                    evaluatorId,
-                    evaluatedId
-                );
+            const alreadyEvaluated = await this.evaluationRepository.hasEvaluated(
+                activityId,
+                evaluatorId,
+                evaluatedId
+            );
 
             if (alreadyEvaluated) {
-                return CreateEvaluationResult.failure(
-                    "Ya has evaluado a este compañero en esta actividad."
-                );
+                return {
+                    isSuccess: false,
+                    message: "Ya has evaluado a este compañero en esta actividad."
+                };
             }
 
             // Crear evaluación
-            const evaluation = new Evaluation(
-                this.generateId(),
+            return await this.evaluationRepository.createEvaluation(
                 activityId,
                 evaluatorId,
                 evaluatedId,
                 punctuality,
                 contributions,
                 commitment,
-                attitude,
-                new Date()
+                attitude
             );
-
-            await this.evaluationRepository.createEvaluation(evaluation);
-
-            return CreateEvaluationResult.success(
-                "Evaluación creada exitosamente.",
-                evaluation
-            );
-        } catch (e) {
-            return CreateEvaluationResult.failure(
-                "Error al crear evaluación: " + (e as Error).message
-            );
+        } catch (error) {
+            console.error('Error in CreateEvaluationUseCase:', error);
+            return {
+                isSuccess: false,
+                message: "Error al crear evaluación: " + (error as Error).message
+            };
         }
-    }
-
-    private generateId(): string {
-        return `eval_${Date.now()}`;
-    }
-}
-
-export class CreateEvaluationResult {
-    readonly isSuccess: boolean;
-    readonly message: string;
-    readonly evaluation?: Evaluation;
-
-    private constructor(params: {
-        isSuccess: boolean;
-        message: string;
-        evaluation?: Evaluation;
-    }) {
-        this.isSuccess = params.isSuccess;
-        this.message = params.message;
-        this.evaluation = params.evaluation;
-    }
-
-    static success(message: string, evaluation: Evaluation) {
-        return new CreateEvaluationResult({
-            isSuccess: true,
-            message,
-            evaluation,
-        });
-    }
-
-    static failure(message: string) {
-        return new CreateEvaluationResult({
-            isSuccess: false,
-            message,
-        });
     }
 }

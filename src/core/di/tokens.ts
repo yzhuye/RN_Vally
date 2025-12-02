@@ -5,6 +5,7 @@ export const TOKENS = {
   SignupUC: Symbol("SignupUC"),
   LogoutUC: Symbol("LogoutUC"),
   GetCurrentUserUC: Symbol("GetCurrentUserUC"),
+  GetUserIdByEmailUC: Symbol("GetUserIdByEmailUC"),
   ProductRemoteDS: Symbol("ProductRemoteDS"),
   ProductRepo: Symbol("ProductRepo"),
   AddProductUC: Symbol("AddProductUC"),
@@ -43,4 +44,11 @@ export const TOKENS = {
   GetActivityByIdUC: Symbol("GetActivityByIdUC"),
   UpdateActivityUC: Symbol("UpdateActivityUC"),
   DeleteActivityUC: Symbol("DeleteActivityUC"),
+  // Evaluation tokens
+  EvaluationRemoteDS: Symbol("EvaluationRemoteDS"),
+  EvaluationRepo: Symbol("EvaluationRepo"),
+  CreateEvaluationUC: Symbol("CreateEvaluationUC"),
+  GetEvaluationsByActivityUC: Symbol("GetEvaluationsByActivityUC"),
+  UpdateEvaluationUC: Symbol("UpdateEvaluationUC"),
+  CheckEvaluationEligibilityUC: Symbol("CheckEvaluationEligibilityUC"),
 } as const;

@@ -58,7 +58,7 @@ export function AddCategoryDialog({ visible, onDismiss, onAdd }: AddCategoryDial
           />
 
           <Text style={styles.label}>Método de agrupación:</Text>
-          <RadioButton.Group onValueChange={setGroupingMethod} value={groupingMethod}>
+          <RadioButton.Group onValueChange={(value) => setGroupingMethod(value as 'random' | 'self-assigned' | 'manual')} value={groupingMethod}>
             <View style={styles.radioItem}>
               <RadioButton value="self-assigned" />
               <Text>Auto-asignado</Text>
@@ -166,7 +166,7 @@ export function EditCategoryDialog({ visible, category, onDismiss, onEdit }: Edi
           />
 
           <Text style={styles.label}>Método de agrupación:</Text>
-          <RadioButton.Group onValueChange={setGroupingMethod} value={groupingMethod}>
+          <RadioButton.Group onValueChange={(value) => setGroupingMethod(value as 'random' | 'self-assigned' | 'manual')} value={groupingMethod}>
             <View style={styles.radioItem}>
               <RadioButton value="self-assigned" />
               <Text>Auto-asignado</Text>

@@ -75,7 +75,7 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
           message: data.message || 'Error al crear la categoría',
         };
       }
-      console.log(data);
+
       return {
         isSuccess: true,
         message: 'Categoría creada exitosamente',
@@ -115,7 +115,6 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
       });
 
       const data = await response.json();
-      console.log(`data`, data);
       if (!response.ok) {
         return {
           isSuccess: false,
