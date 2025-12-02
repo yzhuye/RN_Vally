@@ -94,10 +94,12 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
     category: Category
   ): Promise<{ isSuccess: boolean; message: string }> {
     try {
+      const token = await this.prefs.retrieveData<string>("token");
       const response = await fetch(`${API_URL}/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           tableName: 'categories',
@@ -113,7 +115,7 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
       });
 
       const data = await response.json();
-
+      console.log(`data`, data);
       if (!response.ok) {
         return {
           isSuccess: false,
@@ -138,10 +140,12 @@ export class CategoryRemoteDataSourceImpl implements CategoryDataSource {
     categoryId: string
   ): Promise<{ isSuccess: boolean; message: string }> {
     try {
+      const token = await this.prefs.retrieveData<string>("token");
       const response = await fetch(`${API_URL}/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           tableName: 'categories',
