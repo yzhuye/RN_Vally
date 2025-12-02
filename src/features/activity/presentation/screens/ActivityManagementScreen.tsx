@@ -1,20 +1,15 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Dialog, IconButton, Menu, Portal, Surface, Text, TextInput } from 'react-native-paper';
+import { Activity } from '../../domain/entities/activity';
+import { useActivity } from '../context/activity.context';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';
 const primaryTextColor = '#212121';
 const backgroundColor = '#F5F7FA';
 const cardBackgroundColor = '#FFFFFF';
-
-type Activity = {
-  id: string;
-  name: string;
-  description: string;
-  dueDate: Date;
-};
 
 type Category = {
   id: string;
@@ -38,9 +33,17 @@ export default function ActivityManagementScreen() {
   const route = useRoute<RouteProp<RouteParams, 'ActivityManagement'>>();
   const navigation = useNavigation();
   const { course, category } = route.params;
+  const { 
+    activities, 
+    isLoading, 
+    loadActivities, 
+    createActivity, 
+    updateActivity, 
+    deleteActivity, 
+    formatDueDate, 
+    getDueDateColor 
+  } = useActivity();
 
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [createDialogVisible, setCreateDialogVisible] = useState(false);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
@@ -51,67 +54,63 @@ export default function ActivityManagementScreen() {
   const [activityDescription, setActivityDescription] = useState('');
   const [activityDueDate, setActivityDueDate] = useState(new Date());
 
-  const getDueDateColor = (dueDate: Date): string => {
-    const now = new Date();
-    const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return '#D32F2F'; // Red - expired
-    if (diffDays <= 2) return '#F57C00'; // Orange - urgent
-    if (diffDays <= 7) return '#FBC02D'; // Yellow - soon
-    return '#388E3C'; // Green - plenty of time
+  useEffect(() => {
+    loadActivities(category.id);
+  }, [category.id]);
+
+  const getColorHex = (colorName: string): string => {
+    switch (colorName) {
+      case 'red': return '#D32F2F';
+      case 'orange': return '#F57C00';
+      case 'yellow': return '#FBC02D';
+      case 'green': return '#388E3C';
+      default: return '#757575';
+    }
   };
 
-  const formatDueDate = (dueDate: Date): string => {
-    const now = new Date();
-    const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return `Vencida hace ${Math.abs(diffDays)} días`;
-    if (diffDays === 0) return 'Vence hoy';
-    if (diffDays === 1) return 'Vence mañana';
-    if (diffDays <= 7) return `Vence en ${diffDays} días`;
-    return `Vence el ${dueDate.toLocaleDateString()}`;
-  };
-
-  const handleCreateActivity = () => {
+  const handleCreateActivity = async () => {
     if (!activityName || !activityDescription) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    const newActivity: Activity = {
-      id: Date.now().toString(),
+    const success = await createActivity({
       name: activityName,
       description: activityDescription,
       dueDate: activityDueDate,
-    };
+      categoryId: category.id,
+    });
 
-    setActivities([...activities, newActivity]);
-    setCreateDialogVisible(false);
-    setActivityName('');
-    setActivityDescription('');
-    setActivityDueDate(new Date());
-    Alert.alert('Éxito', 'Actividad creada exitosamente');
+    if (success) {
+      setCreateDialogVisible(false);
+      setActivityName('');
+      setActivityDescription('');
+      setActivityDueDate(new Date());
+    }
   };
 
-  const handleEditActivity = () => {
+  const handleEditActivity = async () => {
     if (!selectedActivity || !activityName || !activityDescription) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    const updatedActivities = activities.map(act =>
-      act.id === selectedActivity.id
-        ? { ...act, name: activityName, description: activityDescription, dueDate: activityDueDate }
-        : act
-    );
+    const success = await updateActivity({
+      activityId: selectedActivity.id,
+      name: activityName,
+      description: activityDescription,
+      dueDate: activityDueDate,
+    });
 
-    setActivities(updatedActivities);
-    setEditDialogVisible(false);
-    setSelectedActivity(null);
-    setActivityName('');
-    setActivityDescription('');
-    setActivityDueDate(new Date());
-    Alert.alert('Éxito', 'Actividad actualizada exitosamente');
+    if (success) {
+      // Reload activities to get updated data
+      await loadActivities(category.id);
+      setEditDialogVisible(false);
+      setSelectedActivity(null);
+      setActivityName('');
+      setActivityDescription('');
+      setActivityDueDate(new Date());
+    }
   };
 
   const handleDeleteActivity = (activity: Activity) => {
@@ -123,9 +122,12 @@ export default function ActivityManagementScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            setActivities(activities.filter(act => act.id !== activity.id));
-            Alert.alert('Éxito', 'Actividad eliminada');
+          onPress: async () => {
+            const success = await deleteActivity(activity.id);
+            if (success) {
+              // Reload activities after deletion
+              await loadActivities(category.id);
+            }
           },
         },
       ]
@@ -212,8 +214,8 @@ export default function ActivityManagementScreen() {
                     <Text style={styles.activityDescription} numberOfLines={2}>
                       {activity.description}
                     </Text>
-                    <View style={[styles.dueDateBadge, { backgroundColor: `${getDueDateColor(activity.dueDate)}1A`, borderColor: getDueDateColor(activity.dueDate) }]}>
-                      <Text style={[styles.dueDateText, { color: getDueDateColor(activity.dueDate) }]}>
+                    <View style={[styles.dueDateBadge, { backgroundColor: `${getColorHex(getDueDateColor(activity.dueDate))}1A`, borderColor: getColorHex(getDueDateColor(activity.dueDate)) }]}>
+                      <Text style={[styles.dueDateText, { color: getColorHex(getDueDateColor(activity.dueDate)) }]}>
                         {formatDueDate(activity.dueDate)}
                       </Text>
                     </View>

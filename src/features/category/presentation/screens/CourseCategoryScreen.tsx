@@ -28,8 +28,8 @@ export default function CourseCategoryScreen() {
   }, [course._id]);
 
   const handleCategoryPress = (category: any) => {
-    // TODO: Navegar a actividades de la categoría
-    navigation.navigate('CategoryActivity' as never, { course, category } as never);
+    // Navigate to category activities
+    (navigation as any).navigate('CategoryActivity', { course, category });
   };
 
   const getIconForMethod = (method: string): string => {

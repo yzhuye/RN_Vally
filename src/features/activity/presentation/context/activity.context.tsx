@@ -1,13 +1,13 @@
-import { useDI } from "@/src/core/di/DIProvider";
-import { TOKENS } from "@/src/core/di/tokens";
-import { CreateActivityUseCase } from "../../domain/usecases/createActivity.usecases";
-import { GetActivitiesByCategoryUseCase } from "../../domain/usecases/getActivityByCategory.usecases";
-import { GetActivityByIdUseCase } from "../../domain/usecases/getActivityById.usecases";
-import { UpdateActivityUseCase } from "../../domain/usecases/updateActivity.usecases";
-import { DeleteActivityUseCase } from "../../domain/usecases/deleteActivity.usecases";
-import { Activity } from "../../domain/entities/activity";
-import React, { createContext ,useState, useContext } from "react";
-import { Alert } from "react-native";
+import React, { createContext, useContext, useState } from 'react';
+import { Alert } from 'react-native';
+import { useDI } from '../../../../core/di/DIProvider';
+import { TOKENS } from '../../../../core/di/tokens';
+import { Activity } from '../../domain/entities/activity';
+import { CreateActivityUseCase } from '../../domain/usecases/createActivity.usecases';
+import { DeleteActivityUseCase } from '../../domain/usecases/deleteActivity.usecases';
+import { GetActivitiesByCategoryUseCase } from '../../domain/usecases/getActivityByCategory.usecases';
+import { GetActivityByIdUseCase } from '../../domain/usecases/getActivityById.usecases';
+import { UpdateActivityUseCase } from '../../domain/usecases/updateActivity.usecases';
 
 type ActivityContextType = {
   activities: Activity[];

@@ -3,6 +3,7 @@ import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
 
 import { DIProvider } from "./src/core/di/DIProvider";
+import { ActivityProvider } from "./src/features/activity/presentation/context/activity.context";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
 import { CategoryProvider } from "./src/features/category/presentation/context/category.context";
 import { CourseProvider } from "./src/features/course/presentation/context/course.context";
@@ -38,12 +39,14 @@ export default function App() {
         <AuthProvider>
             <CourseProvider>
               <CategoryProvider>
-                <ProfessorProvider>
-                  <NavigationContainer theme={navigationTheme}>
-                    {/* <AuthFlow /> */}
-                    <AuthFlow />
-                  </NavigationContainer>
-                </ProfessorProvider>
+                <ActivityProvider>
+                  <ProfessorProvider>
+                    <NavigationContainer theme={navigationTheme}>
+                      {/* <AuthFlow /> */}
+                      <AuthFlow />
+                    </NavigationContainer>
+                  </ProfessorProvider>
+                </ActivityProvider>
               </CategoryProvider>
             </CourseProvider>
         </AuthProvider>

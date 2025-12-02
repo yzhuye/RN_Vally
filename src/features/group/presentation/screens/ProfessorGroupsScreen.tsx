@@ -25,7 +25,7 @@ type RouteParams = {
 
 export default function ProfessorGroupsScreen() {
   const route = useRoute<RouteProp<RouteParams, 'ProfessorGroups'>>();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation();
   const { 
     groups, 
     isLoading, 
@@ -62,7 +62,7 @@ export default function ProfessorGroupsScreen() {
   };
 
   const navigateToStudentManagement = () => {
-    navigation.navigate('StudentManagement' as never, { course, category } as never);
+    (navigation as any).navigate('StudentManagement', { course, category });
   };
 
   const getFilteredGroups = () => {

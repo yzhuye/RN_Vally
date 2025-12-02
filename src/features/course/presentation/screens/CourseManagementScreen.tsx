@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Text, IconButton, Surface, Button } from 'react-native-paper';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, IconButton, Surface, Text } from 'react-native-paper';
 import { Course } from '../../domain/entities/course';
 import { CourseDetailHeader } from '../components/CourseDetailHeader';
 import { useCourse } from '../context/course.context';
@@ -57,7 +57,7 @@ export default function CourseManagementScreen() {
   };
 
   const navigateToProfessorCategories = () => {
-    navigation.navigate('ProfessorCategory' as never, { course } as never);
+    (navigation as any).navigate('ProfessorCategory', { course });
   };
 
   return (

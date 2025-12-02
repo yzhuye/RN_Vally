@@ -65,15 +65,13 @@ export default function ProfessorCategoryScreen() {
         {
           text: 'Ver Actividades',
           onPress: () => {
-            // TODO: Navegar a actividades
-            Alert.alert('Información', 'Funcionalidad en desarrollo');
+            (navigation as any).navigate('ActivityManagement', { course, category });
           },
         },
         {
           text: 'Ver Grupos',
           onPress: () => {
-            // TODO!!!
-            navigation.navigate('ProfessorGroups' as never, { course, category } as never);
+            (navigation as any).navigate('ProfessorGroups', { course, category });
           },
         },
         {
