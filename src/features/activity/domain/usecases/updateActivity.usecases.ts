@@ -48,18 +48,14 @@ export class UpdateActivityUseCase {
                 };
             }
 
-            const updatedActivity = await this.repository.updateActivity(
+            const result = await this.repository.updateActivity(
                 existingActivity,
                 name.trim(),
                 description.trim(),
                 dueDate
             );
 
-            return {
-                isSuccess: true,
-                message: 'Actividad actualizada exitosamente.',
-                activity: updatedActivity!
-            };
+            return result;
         } catch (error) {
             console.error('Error al actualizar actividad:', error);
             return {

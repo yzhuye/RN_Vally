@@ -17,15 +17,15 @@ export class ActivityRepositoryImpl implements ActivityRepository {
         return this.dataSource.getActivityById(activityId);
     }
 
-    async createActivity(name: string, description: string, dueDate: Date, categoryId: string): Promise<Activity | null> {
+    async createActivity(name: string, description: string, dueDate: Date, categoryId: string): Promise<{ isSuccess: boolean; message: string; activity?: Activity }> {
         return this.dataSource.createActivity(name, description, dueDate, categoryId);
     }
 
-    async updateActivity(activity: Activity, name: string, description: string, dueDate: Date): Promise<Activity | null> {
+    async updateActivity(activity: Activity, name: string, description: string, dueDate: Date): Promise<{ isSuccess: boolean; message: string; activity?: Activity }> {
         return this.dataSource.updateActivity(activity, name, description, dueDate);
     }
 
-    async deleteActivity(activityId: string): Promise<boolean> {
+    async deleteActivity(activityId: string): Promise<{ isSuccess: boolean; message: string }> {
         return this.dataSource.deleteActivity(activityId);
     }
 }

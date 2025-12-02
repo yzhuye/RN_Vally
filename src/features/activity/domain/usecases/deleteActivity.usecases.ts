@@ -28,9 +28,8 @@ export class DeleteActivityUseCase {
                 };
             }
 
-            await this.repository.deleteActivity(activityId);
-
-            return { isSuccess: true, message: 'Actividad eliminada exitosamente.' };
+            const result = await this.repository.deleteActivity(activityId);
+            return result;
         } catch (e) {
             return { isSuccess: false, message: `Error al eliminar actividad: ${e}` };
         }

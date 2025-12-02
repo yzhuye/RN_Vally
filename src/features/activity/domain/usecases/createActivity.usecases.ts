@@ -29,13 +29,8 @@ export class CreateActivityUseCase {
                 return { isSuccess: false, message: 'La fecha de vencimiento debe ser futura.' };
             }
 
-            const activity = await this.repository.createActivity(name, description, dueDate, categoryId);
-
-            if (activity) {
-                return { isSuccess: true, message: 'Actividad creada exitosamente.', activity };
-            } else {
-                return { isSuccess: false, message: 'Error al crear la actividad.' };
-            }
+            const result = await this.repository.createActivity(name, description, dueDate, categoryId);
+            return result;
         } catch (e) {
             return { isSuccess: false, message: `Error al crear actividad: ${e}` };
         }

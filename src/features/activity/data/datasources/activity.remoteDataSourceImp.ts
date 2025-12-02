@@ -112,104 +112,153 @@ export class ActivityRemoteDataSourceImpl implements ActivityDataSource {
         );
     }
 
-    async createActivity(name: string, description: string, dueDate: Date, categoryId: string): Promise<Activity | null> {
-        const url = `${this.baseUrl}/insert`;
-        const body = {
-            tableName: this.activityTable,
-            records: [
-                {
+    async createActivity(name: string, description: string, dueDate: Date, categoryId: string): Promise<{ isSuccess: boolean; message: string; activity?: Activity }> {
+        try {
+            const url = `${this.baseUrl}/insert`;
+            const body = {
+                tableName: this.activityTable,
+                records: [
+                    {
+                        name,
+                        description,
+                        dueDate: dueDate.toISOString(),
+                        categoryId,
+                    },
+                ],
+            };
+
+            const response = await this.authorizedFetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    isSuccess: false,
+                    message: data.message || 'Error al crear la actividad',
+                };
+            }
+
+            if (!data.inserted || data.inserted.length === 0) {
+                return {
+                    isSuccess: false,
+                    message: 'No se pudo crear la actividad',
+                };
+            }
+
+            const row = data.inserted[0];
+            const activity = new Activity(
+                row._id,
+                name,
+                description,
+                dueDate,
+                categoryId,
+                row.evaluations || []
+            );
+
+            return {
+                isSuccess: true,
+                message: 'Actividad creada exitosamente',
+                activity,
+            };
+        } catch (error) {
+            console.error('Error creating activity:', error);
+            return {
+                isSuccess: false,
+                message: 'Error de conexión',
+            };
+        }
+    } 
+
+    async updateActivity(activity: Activity, name: string, description: string, dueDate: Date): Promise<{ isSuccess: boolean; message: string; activity?: Activity }> {
+        try {
+            const url = `${this.baseUrl}/update`;
+            const body = {
+                tableName: this.activityTable,
+                idColumn: "_id",
+                idValue: activity.id,
+                updates: {
                     name,
                     description,
                     dueDate: dueDate.toISOString(),
-                    categoryId,
                 },
-            ],
-        };
+            };
 
-        const response = await this.authorizedFetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
+            const response = await this.authorizedFetch(url, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
 
-        if (!response.ok) {
-            throw new Error(`Failed to create activity: ${response.statusText}`);
-        }
+            const data = await response.json();
 
-        const data = await response.json();
-        if (data.length === 0) {
-            return null;
-        }
+            if (!response.ok) {
+                return {
+                    isSuccess: false,
+                    message: data.message || 'Error al actualizar la actividad',
+                };
+            }
 
-        const row = data[0];
-        return new Activity(
-            row._id,
-            name,
-            description,
-            dueDate,
-            categoryId,
-            row.evaluations || []
-        );
-    } 
-
-    async updateActivity(activity: Activity, name: string, description: string, dueDate: Date): Promise<Activity | null> {
-        const url = `${this.baseUrl}/update`;
-        const body = {
-            tableName: this.activityTable,
-            idColumn: "_id",
-            idValue: activity.id,
-            updates: {
+            const updatedActivity = new Activity(
+                activity.id,
                 name,
                 description,
-                dueDate: dueDate.toISOString(),
-            },
-        };
+                dueDate,
+                activity.categoryId,
+                activity.evaluations
+            );
 
-        const response = await this.authorizedFetch(url, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to update activity: ${response.statusText}`);
+            return {
+                isSuccess: true,
+                message: 'Actividad actualizada exitosamente',
+                activity: updatedActivity,
+            };
+        } catch (error) {
+            console.error('Error updating activity:', error);
+            return {
+                isSuccess: false,
+                message: 'Error de conexión',
+            };
         }
-
-        const data = await response.json();
-        if (data.length === 0) {
-            return null;
-        }
-
-        const row = data[0];
-        return new Activity(
-            row._id,
-            name,
-            description,
-            dueDate,
-            activity.categoryId,
-            row.evaluations || []
-        );
     }
 
-    async deleteActivity(activityId: string): Promise<boolean> {
-        const url = `${this.baseUrl}/delete`;
-        const body = {
-            tableName: this.activityTable,
-            idColumn: "_id",
-            idValue: activityId,
-        };
+    async deleteActivity(activityId: string): Promise<{ isSuccess: boolean; message: string }> {
+        try {
+            const url = `${this.baseUrl}/delete`;
+            const body = {
+                tableName: this.activityTable,
+                idColumn: "_id",
+                idValue: activityId,
+            };
 
-        const response = await this.authorizedFetch(url, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
+            const response = await this.authorizedFetch(url, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
 
-        if (!response.ok) {
-            throw new Error(`Failed to delete activity: ${response.statusText}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    isSuccess: false,
+                    message: data.message || 'Error al eliminar la actividad',
+                };
+            }
+
+            return {
+                isSuccess: true,
+                message: 'Actividad eliminada exitosamente',
+            };
+        } catch (error) {
+            console.error('Error deleting activity:', error);
+            return {
+                isSuccess: false,
+                message: 'Error de conexión',
+            };
         }
-
-        const data = await response.json();
-        return data._id === activityId;
     }
 }
