@@ -51,4 +51,9 @@ export const TOKENS = {
   GetEvaluationsByActivityUC: Symbol("GetEvaluationsByActivityUC"),
   UpdateEvaluationUC: Symbol("UpdateEvaluationUC"),
   CheckEvaluationEligibilityUC: Symbol("CheckEvaluationEligibilityUC"),
+  // Report tokens
+  ReportRepo: Symbol("ReportRepo"),
+  GetActivityReportsUC: Symbol("GetActivityReportsUC"),
+  GetGroupReportsUC: Symbol("GetGroupReportsUC"),
+  GetStudentReportsUC: Symbol("GetStudentReportsUC"),
 } as const;

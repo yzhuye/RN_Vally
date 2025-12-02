@@ -1,7 +1,9 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Surface, Text } from 'react-native-paper';
+import { ActivityReport, GroupReport, StudentReport } from '../../domain/entities/reportTypes';
+import { useReport } from '../context/report.context';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';
@@ -13,26 +15,6 @@ type Course = {
   id: string;
   title: string;
   description: string;
-};
-
-type ActivityReport = {
-  activityId: string;
-  activityName: string;
-  averageScore: number;
-  evaluationCount: number;
-};
-
-type GroupReport = {
-  groupId: string;
-  groupName: string;
-  averageScore: number;
-  memberCount: number;
-};
-
-type StudentReport = {
-  studentEmail: string;
-  averageScore: number;
-  evaluationCount: number;
 };
 
 type RouteParams = {
@@ -48,13 +30,53 @@ export default function ReportScreen() {
   const navigation = useNavigation();
   const { course, categoryId, categoryName } = route.params;
 
+  const { getActivityReports, getGroupReports, getStudentReports } = useReport();
+
   const [selectedTab, setSelectedTab] = useState<'general' | 'groups' | 'students'>('general');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock data
+  // Real data from context
   const [activityReports, setActivityReports] = useState<ActivityReport[]>([]);
   const [groupReports, setGroupReports] = useState<GroupReport[]>([]);
   const [studentReports, setStudentReports] = useState<StudentReport[]>([]);
+
+  useEffect(() => {
+    loadReports();
+  }, [categoryId]);
+
+  const loadReports = async () => {
+    setIsLoading(true);
+    try {
+      // Load all report types
+      const [activityResult, groupResult, studentResult] = await Promise.all([
+        getActivityReports(categoryId),
+        getGroupReports(categoryId),
+        getStudentReports(categoryId),
+      ]);
+
+      if (activityResult.isSuccess && activityResult.data) {
+        setActivityReports(activityResult.data);
+      } else {
+        console.warn('Failed to load activity reports:', activityResult.message);
+      }
+
+      if (groupResult.isSuccess && groupResult.data) {
+        setGroupReports(groupResult.data);
+      } else {
+        console.warn('Failed to load group reports:', groupResult.message);
+      }
+
+      if (studentResult.isSuccess && studentResult.data) {
+        setStudentReports(studentResult.data);
+      } else {
+        console.warn('Failed to load student reports:', studentResult.message);
+      }
+    } catch (error) {
+      console.error('Error loading reports:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getScoreColor = (score: number): string => {
     if (score >= 4.5) return '#4CAF50';
@@ -241,9 +263,7 @@ export default function ReportScreen() {
   };
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    // TODO: Implement refresh logic
-    setTimeout(() => setIsLoading(false), 1000);
+    loadReports();
   };
 
   return (

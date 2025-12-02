@@ -10,6 +10,7 @@ import { CourseProvider } from "./src/features/course/presentation/context/cours
 import { EvaluationProvider } from "./src/features/evaluation/presentation/context/evaluation.context";
 import { GroupProvider } from "./src/features/group/presentation/context/group.context";
 import { ProfessorProvider } from "./src/features/group/presentation/context/professor.context";
+import { ReportProvider } from "./src/features/report/presentation/context/report.context";
 import { lightTheme } from "./src/theme/theme";
 
 import AuthFlow from "./src/AuthFlow";
@@ -43,14 +44,16 @@ export default function App() {
               <CategoryProvider>
                 <ActivityProvider>
                   <EvaluationProvider>
-                    <GroupProvider>
-                      <ProfessorProvider>
-                        <NavigationContainer theme={navigationTheme}>
-                          {/* <AuthFlow /> */}
-                          <AuthFlow />
-                        </NavigationContainer>
-                      </ProfessorProvider>
-                    </GroupProvider>
+                    <ReportProvider>
+                      <GroupProvider>
+                        <ProfessorProvider>
+                          <NavigationContainer theme={navigationTheme}>
+                            {/* <AuthFlow /> */}
+                            <AuthFlow />
+                          </NavigationContainer>
+                        </ProfessorProvider>
+                      </GroupProvider>
+                    </ReportProvider>
                   </EvaluationProvider>
                 </ActivityProvider>
               </CategoryProvider>

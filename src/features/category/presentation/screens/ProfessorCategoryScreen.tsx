@@ -77,8 +77,11 @@ export default function ProfessorCategoryScreen() {
         {
           text: 'Ver Reportes',
           onPress: () => {
-            // TODO: Navegar a reportes
-            Alert.alert('Información', 'Funcionalidad en desarrollo');
+            (navigation as any).navigate('Report', { 
+              course, 
+              categoryId: category.id, 
+              categoryName: category.name 
+            });
           },
         },
         {

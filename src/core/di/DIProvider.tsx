@@ -54,6 +54,12 @@ import { CreateEvaluationUseCase } from "@/src/features/evaluation/domain/usecas
 import { GetEvaluationsByActivityUseCase } from "@/src/features/evaluation/domain/usecases/getEvaluationByActivity.usecases";
 import { UpdateEvaluationUseCase } from "@/src/features/evaluation/domain/usecases/updateEvaluation.usecases";
 
+// Report imports
+import { ReportRepositoryImpl } from "@/src/features/report/data/repositories/report.repositoryImpl";
+import { GetActivityReportsUseCase } from "@/src/features/report/domain/usecases/getActivityReports.usecases";
+import { GetGroupReportsUseCase } from "@/src/features/report/domain/usecases/getGroupReports.usecases";
+import { GetStudentReportsUseCase } from "@/src/features/report/domain/usecases/getStudentReports.usecases";
+
 
 const DIContext = createContext<Container | null>(null);
 
@@ -130,6 +136,14 @@ export function DIProvider({ children }: { children: React.ReactNode }) {
             .register(TOKENS.GetEvaluationsByActivityUC, new GetEvaluationsByActivityUseCase(evaluationRepo))
             .register(TOKENS.UpdateEvaluationUC, new UpdateEvaluationUseCase(evaluationRepo))
             .register(TOKENS.CheckEvaluationEligibilityUC, new CheckEvaluationEligibilityUseCase(evaluationRepo, activityRepo, groupRepo));
+
+        // Report DI registrations
+        const reportRepo = new ReportRepositoryImpl(evaluationRepo, activityRepo, groupRepo, authRepo);
+        
+        c.register(TOKENS.ReportRepo, reportRepo)
+            .register(TOKENS.GetActivityReportsUC, new GetActivityReportsUseCase(reportRepo))
+            .register(TOKENS.GetGroupReportsUC, new GetGroupReportsUseCase(reportRepo))
+            .register(TOKENS.GetStudentReportsUC, new GetStudentReportsUseCase(reportRepo));
 
         return c;
     }, []);

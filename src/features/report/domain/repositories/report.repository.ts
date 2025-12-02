@@ -1,12 +1,7 @@
-import { Report } from "../entities/report";
+import { ActivityReport, GroupReport, StudentReport } from '../entities/reportTypes';
 
 export interface ReportRepository {
-    generateReportData(courseId: string, categoryId: string): Promise<Report>;
-    getActivityAverageReport(courseId: string, categoryId: string): Promise<Report['activityAverage']>;
-    getGroupAverageReports(courseId: string, categoryId: string): Promise<Report['groupAverages']>;
-    getStudentAverageReports(courseId: string, categoryId: string): Promise<Report['studentAverages']>;
-    getDetailedResultReports(courseId: string, categoryId: string): Promise<Report['detailedResults']>;
-    getEvaluationsByCategory(categoryId: string): Promise<any[]>; // Replace 'any' with appropriate Evaluation type
-    getActivitiesByCategory(categoryId: string): Promise<any[]>; // Replace 'any' with appropriate Activity type
-    getGroupsByCategory(courseId: string, categoryId: string): Promise<any[]>; // Replace 'any' with appropriate Group type
+  getActivityReports(categoryId: string): Promise<{ isSuccess: boolean; message: string; data?: ActivityReport[] }>;
+  getGroupReports(categoryId: string): Promise<{ isSuccess: boolean; message: string; data?: GroupReport[] }>;
+  getStudentReports(categoryId: string): Promise<{ isSuccess: boolean; message: string; data?: StudentReport[] }>;
 }
