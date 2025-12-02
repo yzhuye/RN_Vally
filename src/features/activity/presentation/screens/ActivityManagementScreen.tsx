@@ -1,6 +1,7 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Dialog, IconButton, Menu, Portal, Surface, Text, TextInput } from 'react-native-paper';
 import { Activity } from '../../domain/entities/activity';
 import { useActivity } from '../context/activity.context';
@@ -48,6 +49,9 @@ export default function ActivityManagementScreen() {
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [menuVisible, setMenuVisible] = useState<{ [key: string]: boolean }>({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<'create' | 'edit'>('create');
 
   // Form state
   const [activityName, setActivityName] = useState('');
@@ -148,6 +152,80 @@ export default function ActivityManagementScreen() {
       `Descripción: ${activity.description}\n\nFecha límite: ${activity.dueDate.toLocaleDateString()} - ${formatDueDate(activity.dueDate)}`,
       [{ text: 'Cerrar' }]
     );
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    if (event.type === 'dismissed') {
+      setShowDatePicker(false);
+      setShowTimePicker(false);
+      return;
+    }
+
+    if (selectedDate) {
+      if (showDatePicker && !showTimePicker) {
+        // Date picker - guardamos la fecha
+        const currentDate = activityDueDate || new Date();
+        const newDate = new Date(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+          currentDate.getHours(),
+          currentDate.getMinutes()
+        );
+        setActivityDueDate(newDate);
+        
+        if (Platform.OS === 'android') {
+          // En Android cerramos date y abrimos time picker
+          setShowDatePicker(false);
+          setTimeout(() => setShowTimePicker(true), 100);
+        } else {
+          // En iOS pasamos directamente al time picker
+          setShowDatePicker(false);
+          setShowTimePicker(true);
+        }
+      } else if (showTimePicker) {
+        // Time picker - actualizamos la hora
+        const currentDate = activityDueDate || new Date();
+        const newDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          selectedDate.getHours(),
+          selectedDate.getMinutes()
+        );
+        setActivityDueDate(newDate);
+        
+        if (Platform.OS === 'android') {
+          setShowTimePicker(false);
+        }
+      }
+    }
+  };
+
+  const confirmIOSDateTime = () => {
+    setShowDatePicker(false);
+    setShowTimePicker(false);
+  };
+
+  const openDatePickerForCreate = () => {
+    setDatePickerMode('create');
+    setShowDatePicker(true);
+  };
+
+  const openDatePickerForEdit = () => {
+    setDatePickerMode('edit');
+    setShowDatePicker(true);
+  };
+
+  const formatDateTime = (date: Date) => {
+    return `${date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    })} ${date.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })}`;
   };
 
   return (
@@ -292,7 +370,18 @@ export default function ActivityManagementScreen() {
               outlineColor={primaryColor}
               activeOutlineColor={primaryColor}
             />
-            <Text style={styles.inputLabel}>Fecha límite: {activityDueDate.toLocaleDateString()}</Text>
+            <TouchableOpacity 
+              style={styles.datePickerButton}
+              onPress={openDatePickerForCreate}
+            >
+              <View style={styles.datePickerContent}>
+                <IconButton icon="calendar" size={24} iconColor={primaryColor} style={styles.dateIcon} />
+                <View style={styles.dateTextContainer}>
+                  <Text style={styles.dateLabel}>Fecha límite</Text>
+                  <Text style={styles.dateValue}>{formatDateTime(activityDueDate)}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setCreateDialogVisible(false)} textColor={secondaryTextColor}>
@@ -328,7 +417,18 @@ export default function ActivityManagementScreen() {
               outlineColor={primaryColor}
               activeOutlineColor={primaryColor}
             />
-            <Text style={styles.inputLabel}>Fecha límite: {activityDueDate.toLocaleDateString()}</Text>
+            <TouchableOpacity 
+              style={styles.datePickerButton}
+              onPress={openDatePickerForEdit}
+            >
+              <View style={styles.datePickerContent}>
+                <IconButton icon="calendar" size={24} iconColor={primaryColor} style={styles.dateIcon} />
+                <View style={styles.dateTextContainer}>
+                  <Text style={styles.dateLabel}>Fecha límite</Text>
+                  <Text style={styles.dateValue}>{formatDateTime(activityDueDate)}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setEditDialogVisible(false)} textColor={secondaryTextColor}>
@@ -340,6 +440,83 @@ export default function ActivityManagementScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      {/* Date Time Picker */}
+      {Platform.OS === 'ios' ? (
+        <>
+          <Portal>
+            <Dialog visible={showDatePicker} onDismiss={() => setShowDatePicker(false)}>
+              <Dialog.Title>Seleccionar Fecha</Dialog.Title>
+              <Dialog.Content>
+                <DateTimePicker
+                  value={activityDueDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={onDateChange}
+                  minimumDate={new Date()}
+                  style={styles.iosDatePicker}
+                  textColor="#000000"
+                  themeVariant="light"
+                />
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={() => setShowDatePicker(false)} textColor={secondaryTextColor}>
+                  Cancelar
+                </Button>
+                <Button onPress={() => {
+                  setShowDatePicker(false);
+                  setShowTimePicker(true);
+                }} textColor={primaryColor}>
+                  Continuar
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+
+            <Dialog visible={showTimePicker} onDismiss={() => setShowTimePicker(false)}>
+              <Dialog.Title>Seleccionar Hora</Dialog.Title>
+              <Dialog.Content>
+                <DateTimePicker
+                  value={activityDueDate}
+                  mode="time"
+                  display="spinner"
+                  onChange={onDateChange}
+                  style={styles.iosDatePicker}
+                  textColor="#000000"
+                  themeVariant="light"
+                />
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={() => setShowTimePicker(false)} textColor={secondaryTextColor}>
+                  Cancelar
+                </Button>
+                <Button onPress={confirmIOSDateTime} textColor={primaryColor}>
+                  Confirmar
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </>
+      ) : (
+        <>
+          {showDatePicker && (
+            <DateTimePicker
+              value={activityDueDate}
+              mode="date"
+              display="default"
+              onChange={onDateChange}
+              minimumDate={new Date()}
+            />
+          )}
+          {showTimePicker && (
+            <DateTimePicker
+              value={activityDueDate}
+              mode="time"
+              display="default"
+              onChange={onDateChange}
+            />
+          )}
+        </>
+      )}
     </Surface>
   );
 }
@@ -468,5 +645,42 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     color: secondaryTextColor,
+  },
+  datePickerButton: {
+    marginTop: 16,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  datePickerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  dateIcon: {
+    margin: 0,
+  },
+  dateTextContainer: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: secondaryTextColor,
+    marginBottom: 4,
+  },
+  dateValue: {
+    fontSize: 16,
+    color: primaryTextColor,
+    fontWeight: '500',
+  },
+  iosDatePicker: {
+    width: '100%',
+    height: 200,
+  },
+  iosPickerText: {
+    color: '#000000',
   },
 });
