@@ -1,20 +1,17 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
+import { useAuth } from '../../../auth/presentation/context/authContext';
+import { useGroup } from '../../../group/presentation/context/group.context';
+import { Activity as ActivityEntity } from '../../domain/entities/activity';
+import { useActivity } from '../context/activity.context';
 
 const primaryColor = '#00A4BD';
 const secondaryTextColor = '#757575';
 const primaryTextColor = '#212121';
 const backgroundColor = '#F5F7FA';
 const cardBackgroundColor = '#FFFFFF';
-
-type Activity = {
-  id: string;
-  name: string;
-  description: string;
-  dueDate: Date;
-};
 
 type Group = {
   id: string;
@@ -46,34 +43,37 @@ export default function CategoryActivityScreen() {
   const route = useRoute<RouteProp<RouteParams, 'CategoryActivity'>>();
   const navigation = useNavigation();
   const { course, category } = route.params;
+  const { user } = useAuth();
+
+  // Activity context
+  const { 
+    activities, 
+    isLoading: activitiesLoading, 
+    loadActivities, 
+    getDueDateColor, 
+    formatDueDate 
+  } = useActivity();
+
+  // Group context
+  const {
+    groups,
+    isLoading: groupsLoading,
+    loadGroups,
+    joinGroup: joinGroupFn,
+    currentGroup,
+    canJoinGroup: canJoinGroupFn
+  } = useGroup();
 
   const [showActivities, setShowActivities] = useState(true);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const studentEmail = 'student@example.com'; // This should come from auth context
+  const isLoading = activitiesLoading || groupsLoading;
 
-  const getDueDateColor = (dueDate: Date): string => {
-    const now = new Date();
-    const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return '#D32F2F';
-    if (diffDays <= 2) return '#F57C00';
-    if (diffDays <= 7) return '#FBC02D';
-    return '#388E3C';
-  };
-
-  const formatDueDate = (dueDate: Date): string => {
-    const now = new Date();
-    const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return `Vencida hace ${Math.abs(diffDays)} días`;
-    if (diffDays === 0) return 'Vence hoy';
-    if (diffDays === 1) return 'Vence mañana';
-    if (diffDays <= 7) return `Vence en ${diffDays} días`;
-    return `Vence el ${dueDate.toLocaleDateString()}`;
-  };
+  // Load data on component mount
+  useEffect(() => {
+    if (category.id) {
+      loadActivities(category.id);
+      loadGroups(category.id);
+    }
+  }, [category.id]);
 
   const isActivityExpired = (dueDate: Date): boolean => {
     return dueDate < new Date();
@@ -84,7 +84,7 @@ export default function CategoryActivityScreen() {
     return 0;
   };
 
-  const navigateToEvaluation = (activity: Activity) => {
+  const navigateToEvaluation = (activity: ActivityEntity) => {
     if (isActivityExpired(activity.dueDate)) {
       Alert.alert('Actividad Vencida', 'Esta actividad ya ha vencido');
       return;
@@ -94,18 +94,16 @@ export default function CategoryActivityScreen() {
       course,
       category,
       activity,
-      studentEmail,
+      studentEmail: user?.email,
     });
   };
 
-  const canJoinGroup = (group: Group): boolean => {
-    if (currentGroup) return false;
-    return group.members.length < group.maxMembers;
-  };
-
-  const joinGroup = (group: Group) => {
-    if (!canJoinGroup(group)) return;
+  const handleJoinGroup = (groupId: string) => {
+    if (!user) return;
     
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return;
+
     Alert.alert(
       'Unirse al Grupo',
       `¿Deseas unirte al grupo "${group.name}"?`,
@@ -114,12 +112,18 @@ export default function CategoryActivityScreen() {
         {
           text: 'Unirse',
           onPress: () => {
-            setCurrentGroup(group);
-            Alert.alert('Éxito', `Te has unido al grupo ${group.name}`);
+            joinGroupFn(groupId, category.id);
           },
         },
       ]
     );
+  };
+
+  const handleRefresh = () => {
+    if (category.id) {
+      loadActivities(category.id);
+      loadGroups(category.id);
+    }
   };
 
   const renderActivitiesView = () => {
@@ -253,7 +257,7 @@ export default function CategoryActivityScreen() {
       <ScrollView style={styles.scrollView}>
         {groups.map((group) => {
           const isMember = currentGroup?.id === group.id;
-          const canJoin = canJoinGroup(group);
+          const canJoin = canJoinGroupFn(group);
 
           return (
             <View key={group.id} style={styles.groupCard}>
@@ -262,7 +266,7 @@ export default function CategoryActivityScreen() {
                 <View style={styles.groupInfo}>
                   <Text style={styles.groupName}>{group.name}</Text>
                   <Text style={styles.groupMembers}>
-                    {group.members.length} / {group.maxMembers} miembros
+                    {group.currentCapacity} / {group.maxCapacity} miembros
                   </Text>
                 </View>
                 {isMember && (
@@ -290,7 +294,7 @@ export default function CategoryActivityScreen() {
               {!isMember && canJoin && (
                 <Button
                   mode="contained"
-                  onPress={() => joinGroup(group)}
+                  onPress={() => handleJoinGroup(group.id)}
                   style={styles.joinButton}
                   buttonColor={primaryColor}
                   textColor="#FFFFFF"
@@ -385,10 +389,7 @@ export default function CategoryActivityScreen() {
             icon="refresh"
             size={20}
             iconColor="#FFFFFF"
-            onPress={() => {
-              // Refresh activities
-              Alert.alert('Refrescar', 'Actualizando actividades...');
-            }}
+            onPress={handleRefresh}
           />
         </View>
       </View>
