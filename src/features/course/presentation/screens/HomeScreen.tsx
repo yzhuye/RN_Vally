@@ -15,7 +15,8 @@ export default function HomeScreen() {
     selectUserType,
     updateSearchText,
     createCourse,
-    joinCourseWithCode 
+    joinCourseWithCode,
+    loadUserCourses
   } = useCourse();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,6 +129,13 @@ export default function HomeScreen() {
           placeholderTextColor="#9E9E9E"
           value={searchQuery}
           onChangeText={handleSearch}
+        />
+        <IconButton
+          icon="refresh"
+          size={24}
+          iconColor="#FFFFFF"
+          style={styles.refreshButton}
+          onPress={loadUserCourses}
         />
       </View>
 
@@ -289,6 +297,10 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     margin: 0,
+  },
+  refreshButton: {
+    backgroundColor: "#00A4BD",
+    marginLeft: 8,
   },
   searchInput: {
     flex: 1,
