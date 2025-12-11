@@ -1,4 +1,5 @@
 import { useAuth } from "@/src/features/auth/presentation/context/authContext";
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { Alert, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Card, Chip, Dialog, IconButton, Portal, Surface, Text, TextInput } from "react-native-paper";
@@ -6,6 +7,7 @@ import { useCourse } from "../context/course.context";
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
   const { 
     filteredCourses,
     isLoading,
@@ -13,7 +15,8 @@ export default function HomeScreen() {
     selectUserType,
     updateSearchText,
     createCourse,
-    joinCourseWithCode 
+    joinCourseWithCode,
+    loadUserCourses
   } = useCourse();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +57,16 @@ export default function HomeScreen() {
   };
 
   const buttonText = selectedUserType === 'Profesor' ? "Crear Curso" : "Unirse a Curso";
+
+  const handleCoursePress = (course: any) => {
+    if (selectedUserType === 'Profesor') {
+      // Navegar a gestión de curso para profesores
+      (navigation as any).navigate('CourseManagement', { course });
+    } else {
+      // Navegar a categorías del curso para estudiantes
+      (navigation as any).navigate('CourseCategory', { course });
+    }
+  };
 
   return (
     <Surface style={styles.container}>
@@ -104,11 +117,25 @@ export default function HomeScreen() {
       </View>
       
       <View style={styles.searchContainer}>
+        <IconButton
+          icon="magnify"
+          size={24}
+          iconColor="#757575"
+          style={styles.searchIcon}
+        />
         <RNTextInput
           style={styles.searchInput}
-          placeholder="Buscar..."
+          placeholder="Buscar cursos..."
+          placeholderTextColor="#9E9E9E"
           value={searchQuery}
           onChangeText={handleSearch}
+        />
+        <IconButton
+          icon="refresh"
+          size={24}
+          iconColor="#FFFFFF"
+          style={styles.refreshButton}
+          onPress={loadUserCourses}
         />
       </View>
 
@@ -130,8 +157,18 @@ export default function HomeScreen() {
           </Surface>
         ) : (
           filteredCourses.map((course) => (
-            <Card key={course._id} style={styles.card}>
-              {course.imageUrl && <Card.Cover source={{ uri: course.imageUrl }} />}
+            <Card key={course._id} style={styles.card} onPress={() => handleCoursePress(course)}>
+              {course.imageUrl ? (
+                <Card.Cover source={{ uri: course.imageUrl }} style={styles.cardCover} />
+              ) : (
+                <View style={styles.placeholderContainer}>
+                  <IconButton
+                    icon="play-circle-outline"
+                    size={48}
+                    iconColor="#00A4BD"
+                  />
+                </View>
+              )}
               <Card.Title title={course.title} titleStyle={styles.cardTitle}/>
               <Card.Content>
                 <Text variant="bodyMedium">{course.description}</Text>
@@ -151,9 +188,17 @@ export default function HomeScreen() {
         style={styles.mainButton}
         onPress={() => selectedUserType === 'Profesor' ? setCreateDialogVisible(true) : setJoinDialogVisible(true)}
       >
-        <Text style={styles.mainButtonText}>
-          {buttonText}
-        </Text>
+        <View style={styles.mainButtonContent}>
+          <IconButton
+            icon={selectedUserType === 'Profesor' ? "plus" : "login"}
+            size={20}
+            iconColor="#00A4BD"
+            style={styles.mainButtonIcon}
+          />
+          <Text style={styles.mainButtonText}>
+            {buttonText}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <Portal>
@@ -255,11 +300,22 @@ const styles = StyleSheet.create({
   searchContainer: {
     width: "100%",
     marginBottom: 20,
-  },
-  searchInput: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#F5F5F5",
     borderRadius: 10,
-    paddingHorizontal: 15,
+  },
+  searchIcon: {
+    margin: 0,
+  },
+  refreshButton: {
+    backgroundColor: "#00A4BD",
+    marginLeft: 8,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
     paddingVertical: 12,
     fontSize: 16,
     borderWidth: 0,
@@ -277,10 +333,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 10,
   },
+  mainButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mainButtonIcon: {
+    margin: 0,
+  },
   mainButtonText: {
     color: "#00A4BD",
     fontSize: 16,
     fontWeight: "600",
+    marginLeft: -8,
   },
   card: {
     width: "100%",
@@ -292,6 +357,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    overflow: "hidden",
+  },
+  cardCover: {
+    height: 120,
+  },
+  placeholderContainer: {
+    height: 120,
+    width: "100%",
+    backgroundColor: "rgba(122, 234, 251, 1)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardTitle: {
     fontWeight: "bold",

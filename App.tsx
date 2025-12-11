@@ -3,8 +3,14 @@ import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
 
 import { DIProvider } from "./src/core/di/DIProvider";
+import { ActivityProvider } from "./src/features/activity/presentation/context/activity.context";
 import { AuthProvider } from "./src/features/auth/presentation/context/authContext";
-import { ProductProvider } from "./src/features/products/presentation/context/productContext";
+import { CategoryProvider } from "./src/features/category/presentation/context/category.context";
+import { CourseProvider } from "./src/features/course/presentation/context/course.context";
+import { EvaluationProvider } from "./src/features/evaluation/presentation/context/evaluation.context";
+import { GroupProvider } from "./src/features/group/presentation/context/group.context";
+import { ProfessorProvider } from "./src/features/group/presentation/context/professor.context";
+import { ReportProvider } from "./src/features/report/presentation/context/report.context";
 import { lightTheme } from "./src/theme/theme";
 
 import AuthFlow from "./src/AuthFlow";
@@ -34,12 +40,24 @@ export default function App() {
     <PaperProvider theme={theme}>
       <DIProvider>
         <AuthProvider>
-          <ProductProvider>
-            <NavigationContainer theme={navigationTheme}>
-              {/* <AuthFlow /> */}
-              <AuthFlow />
-            </NavigationContainer>
-          </ProductProvider>
+            <CourseProvider>
+              <CategoryProvider>
+                <ActivityProvider>
+                  <EvaluationProvider>
+                    <ReportProvider>
+                      <GroupProvider>
+                        <ProfessorProvider>
+                          <NavigationContainer theme={navigationTheme}>
+                            {/* <AuthFlow /> */}
+                            <AuthFlow />
+                          </NavigationContainer>
+                        </ProfessorProvider>
+                      </GroupProvider>
+                    </ReportProvider>
+                  </EvaluationProvider>
+                </ActivityProvider>
+              </CategoryProvider>
+            </CourseProvider>
         </AuthProvider>
       </DIProvider>
     </PaperProvider>

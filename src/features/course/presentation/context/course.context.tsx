@@ -108,7 +108,7 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
         invitationCode: `CODE${Date.now() % 10000}`,
         imageUrl: undefined,
         createdByUserEmail: user.email,
-        createdByUserId: user.email // Usando email como ID por ahora
+        createdByUserId: user.id,
       });
 
       await loadUserCourses();

@@ -6,6 +6,7 @@ export interface AuthRemoteDataSource {
   signUp(email: string, password: string): Promise<void>;
   logOut(): Promise<void>;
   getCurrentUser(): Promise<AuthUser | null>;
+  getUserIdByEmail(email: string): Promise<string | null>;
   validate(email: string, validationCode: string): Promise<boolean>;
   refreshToken(): Promise<boolean>;
   forgotPassword(email: string): Promise<boolean>;

@@ -32,7 +32,7 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         const refreshToken = data["refreshToken"];
         const username = data["user"]["name"];
         
-        // Store all user data
+        // Store auth data first
         await this.prefs.storeData("token", token);
         await this.prefs.storeData("refreshToken", refreshToken);
         await this.prefs.storeData("username", username);
@@ -40,8 +40,15 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         
         console.log("Token:", token, "\nRefresh Token:", refreshToken);
         
-        // Return the user data
+        // Now fetch the user ID from the users table
+        const userId = await this.getUserIdByEmail(email);
+        if (userId) {
+          await this.prefs.storeData("userId", userId);
+        }
+        
+        // Return the user data with ID
         return {
+          id: userId || "",
           email,
           password: "",
           username
@@ -53,6 +60,39 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e: any) {
       console.error("Login failed", e);
       throw e;
+    }
+  }
+
+  async getUserIdByEmail(email: string): Promise<string | null> {
+    try {
+      const token = await this.prefs.retrieveData<string>("token");
+      if (!token) {
+        console.error("No token available for user lookup");
+        return null;
+      }
+
+      const databaseUrl = `https://roble-api.openlab.uninorte.edu.co/database/${this.projectId}`;
+      const response = await fetch(`${databaseUrl}/read?tableName=users&email=${encodeURIComponent(email)}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          return data[0]._id;
+        }
+      } else {
+        console.error("Failed to fetch user ID:", response.status);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error fetching user ID by email:", error);
+      return null;
     }
   }
 
@@ -95,6 +135,7 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await this.prefs.removeData("refreshToken");
         await this.prefs.removeData("username");
         await this.prefs.removeData("email");
+        await this.prefs.removeData("userId");
         console.log("Logged out successfully");
         return Promise.resolve();
       } else {
@@ -193,12 +234,35 @@ export class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       const token = await this.prefs.retrieveData<string>("token");
       const email = await this.prefs.retrieveData<string>("email");
       const username = await this.prefs.retrieveData<string>("username");
+      let userId = await this.prefs.retrieveData<string>("userId");
       
       if (!token) {
         return null; // No token means not logged in
       }
       
+      // Verify that the token is still valid
+      const isTokenValid = await this.verifyToken();
+      
+      if (!isTokenValid) {
+        // Token is invalid or expired, clear stored data
+        await this.prefs.removeData("token");
+        await this.prefs.removeData("refreshToken");
+        await this.prefs.removeData("username");
+        await this.prefs.removeData("email");
+        await this.prefs.removeData("userId");
+        return null;
+      }
+
+      // If we don't have the user ID stored, fetch it
+      if (!userId && email) {
+        userId = await this.getUserIdByEmail(email);
+        if (userId) {
+          await this.prefs.storeData("userId", userId);
+        }
+      }
+      
       return {
+        id: userId || "",
         email: email || "",
         password: "",
         username: username || "Usuario"
